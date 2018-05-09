@@ -1,0 +1,175 @@
+<nav class="navbar navbar-inverse" id="bar" ng-hide="doIt">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="#/">
+      	  <span class="glyphicon glyphicon-arrow-left" ></span> Index
+      </a>
+      <p class="navbar-text"> Select you file .AUT and display the LTS with neighbourhoods in 3D</p>
+    </div>
+  </div>
+</nav>
+
+<!-- <screenshot is-open="appCtrl.isBasicOpen"> -->
+<div id="file" ng-hide="doIt" class="col-xs-12 col-sm-6 col-md-8">
+	<div>
+		<div>Upload a LTS file.</div>
+		<input type="file"  id="graphAutomate" ng-disabled="!isDisabled" accept=".autx" on-read-file="parseContent($fileContent)"/> 
+	</div>
+	<br/>
+	<div ng-show="btns" >
+		<strong>Do you want to add a Counterexample?</strong>
+		<br/>
+		<button type="button" class="btn btn-success" ng-click="yes()">	
+		      <span class="glyphicon glyphicon-ok"></span> Yes
+		</button>
+
+		<button type="button" class="btn btn-danger" ng-click="not()">	
+		      <span class="glyphicon glyphicon-remove"></span> No
+		</button>
+	</div>
+	<br/>
+	<div ng-hide="isDisabled">
+		<div>Upload a Counterexample file.</div>
+		<input type="file" ng-disabled="isDisabled" accept=".aut" on-read-file="parseContent($fileContent)"/>
+	</div>
+</div>
+
+<div class="row tops">
+
+	<div class="col-md-2 centered" ng-if="doIt">
+		<div id="legend">
+			<h2><strong>Legend</strong></h2>
+			<div class="row">
+				<div class="col-md-6"><img class="etats" src="./images/first.png" alt=""></div>
+				<div class="col-md-6">LTS First State</div>
+			</div>
+			
+			<div class="row" ng-if="sinkState">
+				<div class="col-md-6"><img class="etats" src="./images/puisi.png" alt=""></div>
+				<div class="col-md-6">Sink State</div>
+			</div>
+
+			<h5>Types of Transitions</h5>
+			<div class="row margin-img">
+				<div class="col-md-6"><img class="links" src="./images/cor.png"></div>
+				<div class="col-md-6">Correct</div> 
+			</div>
+
+			<div class="row margin-img">
+				<div class="col-md-6"><img class="links" src="./images/inc.png"></div>
+				<div class="col-md-6">Incorrect</div>
+			</div>
+
+			<div class="row margin-img">
+				<div class="col-md-6"><img class="links" src="./images/neut.png"></div>
+				<div class="col-md-6">Neutral</div>
+			</div>
+
+			<div class="row margin-img" ng-show="counter">
+			    <div class="col-md-6"><img class="links" src="./images/neb.png"></div>
+			    <div class="col-md-6">Counter Example</div>
+			</div>
+
+			<h5>Types of neighbourhoods (w.r.t. exiting transitions) </h5>
+			<div class="row margin-img">
+				<div class="col-md-4"><img class="etats" src="./images/G.png" alt=""></div> 
+				<div class="col-md-8">Correct + Neutral Trans.</div> 
+			</div>
+
+			<div class="row margin-img">
+				<div class="col-md-4"><img class="etats" src="./images/r.png" alt=""></div>
+				<div class="col-md-8">Incorrect + Neutral Trans.</div>  
+			</div>
+
+			<div class="row margin-img">
+				<div class="col-md-4"><img class="etats" src="./images/gr.png" alt=""></div>
+				<div class="col-md-8">Correct + Incorrect Trans.</div> 
+			</div> 
+            
+			<div class="row margin-img">
+				<div class="col-md-4"><img class="etats" src="./images/grb.png" alt=""></div>
+				<div class="col-md-8">Correct + Incorrect + Neutral Trans.</div> 
+			</div>
+		</div>
+	</div>
+
+	<div class="col-md-8">
+		
+			<div id="3d-graph"></div>
+		
+	</div>
+
+	<div class="col-md-2 col-md-offset-0 " ng-if="doIt">
+		<div class="alert alert-warning centered files" role="alert"><strong>Filename:</strong> <br>{{nameFile}}</div>
+        <div class="panel panel-primary" ng-if="!freeMode">
+            <div class="panel-heading">
+                <span class="glyphicon glyphicon-hand-up"></span>  Path
+            </div>
+            <div class="panel-body">
+                <ul class="chat" id="statesList">
+				  <li class="list-group-item" ng-repeat="x in backs" ng-click="focusCamera($index)">
+				  	<strong>id state:</strong> {{x.id}} <br/>
+				  	<div ng-hide="x.txt == null"> <strong>Transition: </strong> {{x.txt }}</div>
+				  </li>
+				</ul>
+            </div>
+    	</div>
+
+		
+	</div>
+</div>
+
+<div class="row">
+		<div class="row centered" ng-if="doIt">
+
+			<div class="col-md-2">
+				<button class="btn btn-primary"  ng-click="firstState()">
+					<span class="glyphicon glyphicon-home"></span> LTS initial state
+				</button>
+			</div>
+
+			<div class="col-md-2" >
+				<button type="button" class="btn btn-warning" ng-click="back()" ng-disabled="backs.length < 2">	
+				    <span class="glyphicon glyphicon-arrow-left"></span> Previous state
+				</button>
+			</div>
+			
+			<div class="col-md-2">
+				<button class="btn btn-danger"  ng-click="clean()">
+					<span class="glyphicon glyphicon-refresh"></span> Load Another LTS
+				</button>
+			</div>
+			
+			<div class="col-md-2">
+				<button class="btn btn-default"  ng-click="clkInitialState()" ng-disabled="backs.length === 0  && !freeMode">
+					<span class="glyphicon glyphicon-fullscreen"></span> Another initial state
+				</button>
+			</div>
+					
+			<div class="col-md-2">
+				<button class="btn btn-info"  ng-click="camera()" ng-disabled="freeMode">
+					<span class="glyphicon glyphicon-screenshot"></span> Re-center camera
+				</button>
+			</div>
+
+			<div class="col-md-2">
+				<button class="btn btn-success"  ng-click="activeFree()">
+					<span class="glyphicon glyphicon-move"></span> Explore LTS
+				</button>
+			</div>		
+<!-- 			<div class="col-md-2">
+	<button class="btn btn-success"  ng-click="screenshoot()">
+		<span class="glyphicon glyphicon-move"></span> Screenshoot
+	</button>
+</div> -->
+			<!--<div class="col-md-2">	
+	<button class="btn btn-fab" ng-class="{true: 'btn-danger', false: 'btn-default'}[appCtrl.isBasicOpen]" ng-click="appCtrl.isBasicOpen = !appCtrl.isBasicOpen">
+                                <i ng-if="!appCtrl.isBasicOpen" class="material-icons">crop</i>
+                                <i ng-if="appCtrl.isBasicOpen" class="material-icons">close</i>
+                </button>
+</div> -->
+	    </div>
+</div>
+
+<!-- </screenshot> -->
+
