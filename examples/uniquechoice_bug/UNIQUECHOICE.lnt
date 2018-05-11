@@ -1,0 +1,48 @@
+module UNIQUECHOICE is
+
+process Main [INIT,DEPLOY,START,WAIT,DISCONNECT,STORE_RES,CLOSE,EXT_EVNT,SEND,RECV,STORE,EXEC,LOSS: any] is
+
+   (* initialisation *)
+   select
+      INIT
+   []
+      par
+         INIT || DEPLOY;START
+      end par
+   []
+      par
+         WAIT;INIT || DEPLOY;START
+      end par
+   end select;
+
+   (* computation *)
+   select
+      par
+         WAIT || WAIT;STORE || SEND;RECV || LOSS;WAIT
+      end par;
+      par
+         WAIT;EXEC || EXEC;WAIT
+      end par
+   []
+      par
+         RECV || SEND;RECV || RECV;EXEC || RECV;WAIT
+      end par;
+      par
+         SEND;EXEC || WAIT;SEND
+      end par
+   end select;
+
+   (* close session *)
+   select
+      par
+         DISCONNECT;STORE_RES || STORE_RES;CLOSE
+      end par
+   []
+      par
+         EXT_EVNT;CLOSE || STORE_RES;CLOSE
+      end par
+   end select
+
+end process
+
+end module

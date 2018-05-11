@@ -1,0 +1,22 @@
+module ISOLATED is
+
+process Main [SEND,EXEC,EXT_EVNT,INIT,CONN_LOSS,CONNECT,WAIT:any] is
+   par
+      INIT || WAIT;INIT || INIT;CONNECT
+   end par;
+   select 
+      select 
+         par 
+            CONN_LOSS || WAIT;SEND || WAIT || EXEC
+         end par
+      []
+         EXEC;SEND
+      end select
+   []
+      par
+         EXT_EVNT || WAIT;EXT_EVNT || CONN_LOSS;CONNECT
+      end par
+   end select
+end process
+
+end module

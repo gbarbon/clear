@@ -1,0 +1,23 @@
+module ITERATION is
+
+process Main [WAIT,INIT,REC,EXEC1,EXEC2,LOSS,STORE: any] is
+   var I,K : nat in
+      I := 0;
+      K := 10;
+      for I:=0 while I<K by I:=I+1 loop
+         WAIT;
+         select
+            par
+               EXEC1;STORE || LOSS
+            end par
+         []
+            par
+               REC;EXEC2 || LOSS
+            end par;
+            I:=10
+         end select
+      end loop
+   end var   
+end process
+
+end module

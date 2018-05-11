@@ -1,0 +1,13 @@
+module ALLBAD is
+ 
+process Main [INIT,WAIT,EXEC2,STORE,SEND,EXEC1,REC: any] is
+    INIT;
+    par
+        WAIT || EXEC1;WAIT || WAIT;STORE
+    end par;  
+    par
+        WAIT || EXEC2;WAIT || WAIT;SEND || WAIT;REC
+    end par
+end process
+
+end module

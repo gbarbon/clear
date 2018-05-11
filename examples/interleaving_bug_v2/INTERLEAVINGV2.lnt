@@ -1,0 +1,42 @@
+module INTERLEAVINGV2 is
+
+process Main [ EXEC1,EXEC2,EXEC3,EXEC4,EXEC5,LOSS: any,
+               INIT1,INIT2,INIT3: any,
+               CLOSE1,CLOSE2,CLOSE3,CLOSE4:any,               
+               SEND1,SEND2,SEND3,SEND4: any] is
+   
+   (* initialisation part *)
+   par
+      INIT1 || INIT3;INIT1 || INIT1;INIT2
+   end par;
+   
+   (* central part *)
+   par
+      EXEC1;EXEC2;EXEC3;EXEC4;EXEC5 
+   || 
+      select
+         par
+            SEND2; SEND3 || LOSS
+         end par;
+         SEND1;SEND4      
+      []
+         SEND1;
+         par
+            SEND2 || SEND2;SEND3 || LOSS
+         end par;
+         SEND4
+      end select
+   end par;
+   
+   (* closing part *)
+   select 
+        par 
+            CLOSE3;CLOSE2 || CLOSE4;CLOSE1 || CLOSE2 || CLOSE1
+        end par
+    []
+        CLOSE1;CLOSE2
+   end select
+
+end process
+
+end module

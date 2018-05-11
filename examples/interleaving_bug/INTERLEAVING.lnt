@@ -1,0 +1,15 @@
+module INTERLEAVING is
+
+process Main [EXEC1,EXEC2,EXEC3,EXEC4,EXEC5,LOSS: any] is
+    par
+        EXEC1;EXEC2;EXEC3;EXEC4;EXEC5 
+    || 
+        select
+            LOSS    
+        []
+            null
+        end select
+    end par
+end process
+
+end module

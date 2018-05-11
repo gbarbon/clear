@@ -1,0 +1,115 @@
+module COMMPROC is
+
+-------------------------------------------------------------------------------
+
+   channel WHOAMI_C is
+      (nat)
+   end channel
+
+-------------------------------------------------------------------------------
+
+   (* 
+    * DEPLOYER deploys other processes.
+    *)   
+   process DEPLOYER  [  DEPLOY : WHOAMI_C
+                     ] is
+      par
+         DEPLOY(1 of nat) || DEPLOY(2 of nat) || DEPLOY(3 of nat) 
+      end par
+   end process
+   
+   (* 
+    * PRODCONS can be a producer or a consumer.
+    *)
+   process PRODCONS  [  CONNECT, READY, SYNC, WAIT : any,
+                        DEPLOY, START, IAMPRODUCER, IAMCONSUMER : WHOAMI_C,
+                        CONSUME, PRODUCE : any
+                     ] is
+      var whoami : bool in
+         DEPLOY(1 of nat);
+         START(1 of nat);
+         CONNECT; 
+         select
+            whoami := true; IAMPRODUCER(1 of nat)
+         []      
+            whoami := false; IAMCONSUMER(1 of nat)
+         end select;
+         WAIT;
+         READY;   
+         if (whoami) then
+           loop L in
+               select
+                  NULL [] break L
+               end select;
+               par
+                  WAIT || PRODUCE; SYNC
+               end par
+            end loop
+         else
+            loop L in
+               select
+                  NULL [] SYNC [] break L
+               end select;
+               par
+                  WAIT || CONSUME
+               end par
+            end loop
+         end if
+      end var
+   end process
+   
+   process PRODUCER  [  CONNECT, READY, SYNC, WAIT : any,
+                        DEPLOY, START, IAMPRODUCER : WHOAMI_C,
+                        PRODUCE : any
+                     ] is
+      DEPLOY(2 of nat);
+      START(2 of nat);
+      CONNECT;
+      IAMPRODUCER(2 of nat);
+      READY;
+      loop L in
+         select
+            WAIT [] PRODUCE; SYNC [] break L
+         end select   
+      end loop
+   end process
+
+   process CONSUMER  [  CONNECT, READY, SYNC, WAIT : any,
+                        DEPLOY, START, IAMCONSUMER : WHOAMI_C,
+                        CONSUME : any
+                     ] is
+      DEPLOY(3 of nat);
+      START(3 of nat);
+      CONNECT;
+      IAMCONSUMER(3 of nat);
+      READY;
+      WAIT;
+      loop L in
+         select
+            WAIT [] SYNC; CONSUME [] break L
+         end select   
+      end loop
+   end process
+
+   process MAIN   [  CONNECT, READY, SYNC, WAIT : any,
+                     DEPLOY, START, IAMPRODUCER, IAMCONSUMER : WHOAMI_C,
+                     CONSUME, PRODUCE : any
+                  ] is
+      par DEPLOY in
+         DEPLOYER[DEPLOY]
+      ||
+         par READY, SYNC in
+            PRODCONS[CONNECT, READY, SYNC, WAIT, DEPLOY, START, IAMPRODUCER, IAMCONSUMER, 
+                     CONSUME, PRODUCE]  
+         ||         
+            PRODUCER[CONNECT, READY, SYNC, WAIT, DEPLOY, START, IAMPRODUCER, PRODUCE]  
+         ||
+            CONSUMER[CONNECT, READY, SYNC, WAIT, DEPLOY, START, IAMCONSUMER, CONSUME]  
+         end par
+      end par
+   end process
+
+-------------------------------------------------------------------------------
+
+end module
+

@@ -1,0 +1,6 @@
+([
+    true* . 'SEND2' .
+    true* . 'SEND1' .
+    true*
+] false
+)
