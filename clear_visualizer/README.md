@@ -8,12 +8,13 @@ Installation
 ------------
 
 The CLEAR visualiser can be installed in your machine or used directly online 
-(click [here](https://gbarbon.github.io/clear/) to use the CLEAR visualizer online).
+([here](https://gbarbon.github.io/clear/)).
 In the first case, these are the requirements to install it:
 
-1. download the content of the clear_visualizer directory
-2. install `npm` (necessary for angular, jquery, bootstrap, 3D graph force)
-3. install an Apache Web Server: `sudo apt-get install apache2` in Linux systems
+1. Download the content of the clear_visualizer directory.
+2. Install `npm` (necessary for angular, jquery, bootstrap, 3D graph force).
+3. Install an Apache Web Server: `sudo apt-get install apache2` in Linux 
+systems.
 
 The CLEAR visualizer will then be available in through a web browser at `http://localhost/`.
 

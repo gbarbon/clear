@@ -32,11 +32,8 @@ The CLEAR Analyser will display the discovered neighbourhoods and produce an
 `.autx` file to be used with the CLEAR visualizer.
 
 
-**NOTE:** *in order to generate the Counterexample LTS the CLEAR analyser exploits 
-a feature of the CADP toolbox that is not yet publicly available, but will be 
-released in a future CADP release. Anyway the neighbourhood detection and the
-visualisation can anyway be performed, since the necessary files are all 
-available in each example directory.*
+**NOTE:** *in order to generate the Counterexample LTS the CLEAR analyser 
+exploits some private features of the CADP toolbox, which will be made publicly available in a future CADP release.*
 
 License
 =======

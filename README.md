@@ -4,10 +4,12 @@ This repository contains the CLEAR framework for the debugging of concurrent
 systems.
 
 You can find Installation and Usage instructions for each CLEAR framework 
-component (analyser and visualiser) in their respective sub-folders.
+component (Analyser and Visualiser) in their respective sub-folders.
 
-You can test the CLEAR framework with the examples contained in the `examples`
-sub-folder.
+You can use the examples contained in the `examples` folder to try the CLEAR 
+framework. 
+Each CLEAR framework component can be used independently, since
+all the necessary input files are provided in each example sub-folder.
 
 
 License
