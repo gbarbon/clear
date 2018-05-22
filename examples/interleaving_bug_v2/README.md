@@ -26,7 +26,7 @@ Likewise, we can see the closing part of the specification where all
 transitions are incorrect (red) and where the bug cannot be avoided. 
 These two parts (entirely black or entirely red) can be viewed as 'noise' or 
 actions that are not helpful from a debugging perspective. 
-In contrast the central part is highly interesting. There are six neighbourhood 
+In contrast, the central part is highly interesting. There are six neighbourhood 
 states in that part of the LTS corresponding to a choice between executing a 
 correct part of the specification (avoiding the sequence with a SEND2 action 
 followed by a SEND1 action) leading to the white state (sink state), or 
@@ -38,13 +38,13 @@ the attraction of the sink state in the visualization.
 
 Files
 -----
-- `INTERLEAVINGV2.lnt` : LNT specification file
-- `INTERLEAVINGV2.aut` : AUT model file
-- `prop.mcl` : MVL property
-- `cexplts_gen.svl` : SVL script for the Counterexample LTS generation
-- `bad_prop_INTERLEAVINGV2.aut` : AUT Counterexample LTS
-- `bad_prop_INTERLEAVINGV2_unclean.aut` : used by the CLEAR analyser
-- `bad_prop_INTERLEAVINGV2_unclean.prd` : used by the CLEAR analyser
-- `bad_prop_INTERLEAVINGV2_res-dump.autx` : Counterexample LTS with 
-    neighbourhoods, input file for the CLEAR visualizer 
-
+- `INTERLEAVINGV2.lnt` : LNT specification file, required by the *cexplts_gen.svl* script
+- `INTERLEAVINGV2.aut` : AUT model file, required by the *cexplts_gen.svl* script
+- `prop.mcl` : MCL property, required by the *cexplts_gen.svl* script and 
+               and the *CLEAR analyser*
+- `cexplts_gen.svl` : counterexample LTS generation SVL script
+- `bad_prop_INTERLEAVINGV2.aut` : AUT counterexample LTS
+- `bad_prop_INTERLEAVINGV2_unclean.aut` : file required by the *CLEAR analyser*
+- `bad_prop_INTERLEAVINGV2_unclean.prd` : file required by the *CLEAR analyser*
+- `bad_prop_INTERLEAVINGV2_res-dump.autx` : counterexample LTS with neighbourhoods, 
+    required by the *CLEAR visualizer* 

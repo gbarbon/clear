@@ -31,13 +31,13 @@ of the behaviour.
 
 Files
 -----
-- `ITERATION.lnt` : LNT specification file
-- `ITERATION.aut` : AUT model file
-- `prop.mcl` : MVL property
-- `cexplts_gen.svl` : SVL script for the Counterexample LTS generation
-- `bad_prop_ITERATION.aut` : AUT Counterexample LTS
-- `bad_prop_ITERATION_unclean.aut` : used by the CLEAR analyser
-- `bad_prop_ITERATION_unclean.prd` : used by the CLEAR analyser
-- `bad_prop_ITERATION_res-dump.autx` : Counterexample LTS with neighbourhoods,
-    input file for the CLEAR visualizer 
-
+- `ITERATION.lnt` : LNT specification file, required by the *cexplts_gen.svl* script
+- `ITERATION.aut` : AUT model file, required by the *cexplts_gen.svl* script
+- `prop.mcl` : MCL property, required by the *cexplts_gen.svl* script and 
+               and the *CLEAR analyser*
+- `cexplts_gen.svl` : counterexample LTS generation SVL script
+- `bad_prop_ITERATION.aut` : AUT counterexample LTS
+- `bad_prop_ITERATION_unclean.aut` : file required by the *CLEAR analyser*
+- `bad_prop_ITERATION_unclean.prd` : file required by the *CLEAR analyser*
+- `bad_prop_ITERATION_res-dump.autx` : counterexample LTS with neighbourhoods, 
+    required by the *CLEAR visualizer* 

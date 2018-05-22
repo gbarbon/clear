@@ -16,7 +16,7 @@ This is written in MCL as follows: `( [ true* . 'LOSS' . true* ] false )`.
 
 Figure Description
 ------------------
-The initial state appears in orange (not in red as is usually colored the 
+The initial state appears in orange (not in red as is usually coloured the 
 initial state) because that state is a neighbourhood. There is a sequence in 
 which the bug does not appear (sequence of neutral black transitions leading 
 to a correct green one). This happens when all EXECi actions execute and the 
@@ -26,13 +26,13 @@ representation in our tool is similar to a 'comb'.
 
 Files
 -----
-- `INTERLEAVING.lnt` : LNT specification file
-- `INTERLEAVING.aut` : AUT model file
-- `prop.mcl` : MVL property
-- `cexplts_gen.svl` : SVL script for the Counterexample LTS generation
-- `bad_prop_INTERLEAVING.aut` : AUT Counterexample LTS
-- `bad_prop_INTERLEAVING_unclean.aut` : used by the CLEAR analyser
-- `bad_prop_INTERLEAVING_unclean.prd` : used by the CLEAR analyser           
-- `bad_prop_INTERLEAVING_res-dump.autx` : Counterexample LTS with neighbourhoods,
-    input file for the CLEAR visualizer 
-
+- `INTERLEAVING.lnt` : LNT specification file, required by the *cexplts_gen.svl* script
+- `INTERLEAVING.aut` : AUT model file, required by the *cexplts_gen.svl* script
+- `prop.mcl` : MCL property, required by the *cexplts_gen.svl* script and 
+               and the *CLEAR analyser*
+- `cexplts_gen.svl` : counterexample LTS generation SVL script
+- `bad_prop_INTERLEAVING.aut` : AUT counterexample LTS
+- `bad_prop_INTERLEAVING_unclean.aut` : file required by the *CLEAR analyser*
+- `bad_prop_INTERLEAVING_unclean.prd` : file required by the *CLEAR analyser*
+- `bad_prop_INTERLEAVING_res-dump.autx` : counterexample LTS with neighbourhoods, 
+    required by the *CLEAR visualizer* 
