@@ -24,11 +24,12 @@ class Etat {
 }
 
 class Transition {
-  constructor(des,txt, color,next){
+  constructor(des,txt, color,next,curve){
     this.source = des;
     this.name = txt;
     this.group  = color;
-    this.target = next; 
+    this.target = next;
+    this.curvature = curve; 
   }
 }
 
@@ -47,32 +48,6 @@ myapp.controller("controllerAutomate",function($scope){
       $scope.counter = true;
     }
   };
-
-/*$scope.screenshoot = function(){
-    html2canvas(document.getElementById("3d-graph")).then(function(canvas) {
-      return Canvas2Image.saveAsPNG(canvas);
-    });
-  };*/
-
-/*
-  $scope.saveAs =  function(uri, filename) {
-    var link = document.createElement('a');
-    if (typeof link.download === 'string') {
-      link.href = uri;
-      link.download = filename;
-
-      //Firefox requires the link to be in the body
-      document.body.appendChild(link);
-
-      //simulate click
-      link.click();
-
-      //remove the link when done
-      document.body.removeChild(link);
-    } else {
-      window.open(uri);
-    }
-  };*/
 
   $scope.yes = function(){
     $scope.isDisabled = false;
@@ -158,7 +133,7 @@ myapp.controller("controllerAutomate",function($scope){
   };
 
   $scope.parserCont = function(content){
-    var currentline, label,neigth, tran;
+    var currentline, label,neigth,ini,des;
     var lines = content.split("\n");
     for (var i = 0; i < lines.length; i++) {
       if(lines[i].length > 1){
@@ -177,36 +152,84 @@ myapp.controller("controllerAutomate",function($scope){
           label = currentline[1].split(":");
           if(currentline[0].indexOf("N") != -1){
             neigth = currentline[0].split(":",3);
-            tran = new Transition(parseInt(neigth[0]),label[0],label[1],parseInt(currentline[2]));
-            $scope.trans.push(tran);
-            $scope.validate(parseInt(currentline[2]));
+             ini = parseInt(neigth[0]);
+             des = parseInt(currentline[2])
+             if(ini === des){
+              var tran = new Transition(ini,label[0],label[1],des,0.95);
+              $scope.trans.push(tran);
+              $scope.validate(ini);
+              $scope.validate(des);
+             }else{
+              $scope.curveLinesValidation(ini,label[0],label[1],des);
+             }
             $scope.neigthB(neigth);
           }else {
-            tran = new Transition(parseInt(currentline[0]),label[0],label[1],parseInt(currentline[2]));
-            $scope.trans.push(tran);
-            $scope.validate(parseInt(currentline[0]));
-            $scope.validate(parseInt(currentline[2]));
+            ini = parseInt(currentline[0]);
+            des = parseInt(currentline[2]);
+            if(ini === des){
+              var tran = new Transition(ini,label[0],label[1],des,0.95);
+              $scope.trans.push(tran);
+              $scope.validate(ini);
+              $scope.validate(des);
+            }else{
+              $scope.curveLinesValidation(ini,label[0],label[1],des);
+            }
           }
         }
       }
     }
   };
+
+
+  $scope.curveLinesValidation= function(init,label1,label2,destination){
+    var band = false;
+    if($scope.trans.length>0){
+      for (var i = 0; i < $scope.trans.length; i++) {
+        if(init === $scope.trans[i].target && destination === $scope.trans[i].source){
+          $scope.trans[i].curvature = 0.8;
+          band = true;
+        }
+      }
+
+      if(band){
+        var tran = new Transition(init,label1,label2,destination,0.8);
+        $scope.trans.push(tran);
+        $scope.validate(init);
+        $scope.validate(destination);
+      }else{
+        var tran = new Transition(init,label1,label2,destination,0);
+        $scope.trans.push(tran);
+        $scope.validate(init);
+        $scope.validate(destination);
+      }
+
+    }else{
+      var tran = new Transition(init,label1,label2,destination,0);
+      $scope.trans.push(tran);
+      $scope.validate(init);
+      $scope.validate(destination);
+    }
+  }
   
   $scope.draw = function(){
     var automateObject = new Automate($scope.ets,$scope.trans);
+    var wid = $("#graph").width();
+    var hei = $(window).height() - 70;
+    //console.log("taille:"+ wid + " - " + hei);
     $scope.gData = automateObject;
     Graph = ForceGraph3D()
       (document.getElementById('3d-graph'))
       .graphData($scope.gData)
       .backgroundColor('#D8D8D8')
-      .width(window.innerWidth - 500)
-      .height(window.innerHeight - 70)
+      .width(wid)
+      .height(hei)
       .nodeId('id')
       .nodeColor('color')
       .nodeLabel(d =>`<span style="color: black">${d.id}</span>`)
       .linkLabel(d =>`<span style="color: ${d.group}">${d.name}</span>`)
       .enableNodeDrag(false)
       .linkColor('group')
+      .linkCurvature('curvature')
       .onNodeClick(node => {
         const distRatio = 1 + 95/Math.hypot(node.x, node.y, node.z);
         var etatB; 
@@ -357,20 +380,20 @@ myapp.controller("controllerAutomate",function($scope){
 });
 
 myapp.directive('onReadFile', function ($parse) {
-	return {
-		restrict: 'A',
-		scope: false,
-		link: function(scope, element, attrs) {
+  return {
+    restrict: 'A',
+    scope: false,
+    link: function(scope, element, attrs) {
       var fn = $parse(attrs.onReadFile);
-			element.on('change', function(onChangeEvent) {
-				var reader = new FileReader();
-				reader.onload = function(onLoadEvent) {
-					scope.$apply(function() {
-						fn(scope, {$fileContent:onLoadEvent.target.result});
-					});
-				};
-				reader.readAsText((onChangeEvent.srcElement || onChangeEvent.target).files[0]);
-			});
-		}
-	};
+      element.on('change', function(onChangeEvent) {
+        var reader = new FileReader();
+        reader.onload = function(onLoadEvent) {
+          scope.$apply(function() {
+            fn(scope, {$fileContent:onLoadEvent.target.result});
+          });
+        };
+        reader.readAsText((onChangeEvent.srcElement || onChangeEvent.target).files[0]);
+      });
+    }
+  };
 });

@@ -9,8 +9,8 @@
   "author": "Emmanuel Yah Lopez",
   "license": "ISC",
   "dependencies": {
-    "3d-force-graph": "^1.29.1",
-    "angular": "^1.6.9",
+    "3d-force-graph": "^1.32.7",
+    "angular": "^1.7.0",
     "angular-screenshot": "^0.4.1",
     "bootstrap": "^3.3.7",
     "html2canvas": "^1.0.0-alpha.12",
