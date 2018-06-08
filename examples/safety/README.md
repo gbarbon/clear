@@ -1,9 +1,11 @@
 ## CLEAR framework
 
-The directory `visualization` contains some examples to evaluate the 
-CLEAR Visualizer. 
+Case studies with safety properties:
 
-The directory `safety` contains some case studies with safety properties.
+- empirical: case studies for the empirical study
+- sanitary_agency
+- multiway_rendezvous_protocol: (`.aut` model only)
+- shifumi_3: shifumi three players (`.aut` model only)
 
 License
 =======

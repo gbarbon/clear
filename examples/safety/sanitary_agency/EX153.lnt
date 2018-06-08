@@ -1,0 +1,475 @@
+module EX153 with "get" is 
+
+(* LNT processes for peers *)
+
+process peer1 [acceptance_REC:any,askinf_REC:any,paymentprivatefee_EM:any,provinf_EM:any,provm_REC:any,provt_REC:any,refusal_REC:any,request_EM:any]  is 
+peer1_s0 [acceptance_REC,askinf_REC,paymentprivatefee_EM,provinf_EM,provm_REC,provt_REC,refusal_REC,request_EM] 
+end process 
+
+process peer1_s0 [acceptance_REC:any,askinf_REC:any,paymentprivatefee_EM:any,provinf_EM:any,provm_REC:any,provt_REC:any,refusal_REC:any,request_EM:any]  is 
+ select 
+  request_EM; peer1_s1 [acceptance_REC,askinf_REC,paymentprivatefee_EM,provinf_EM,provm_REC,provt_REC,refusal_REC,request_EM] 
+ end select 
+end process 
+
+process peer1_s1 [acceptance_REC:any,askinf_REC:any,paymentprivatefee_EM:any,provinf_EM:any,provm_REC:any,provt_REC:any,refusal_REC:any,request_EM:any]  is 
+ select 
+  askinf_REC; peer1_s2 [acceptance_REC,askinf_REC,paymentprivatefee_EM,provinf_EM,provm_REC,provt_REC,refusal_REC,request_EM] 
+ end select 
+end process 
+
+process peer1_s2 [acceptance_REC:any,askinf_REC:any,paymentprivatefee_EM:any,provinf_EM:any,provm_REC:any,provt_REC:any,refusal_REC:any,request_EM:any]  is 
+ select 
+  provinf_EM; peer1_s3 [acceptance_REC,askinf_REC,paymentprivatefee_EM,provinf_EM,provm_REC,provt_REC,refusal_REC,request_EM] 
+ end select 
+end process 
+
+process peer1_s3 [acceptance_REC:any,askinf_REC:any,paymentprivatefee_EM:any,provinf_EM:any,provm_REC:any,provt_REC:any,refusal_REC:any,request_EM:any]  is 
+ select 
+  refusal_REC
+
+[]
+  acceptance_REC; peer1_s4 [acceptance_REC,askinf_REC,paymentprivatefee_EM,provinf_EM,provm_REC,provt_REC,refusal_REC,request_EM] 
+ end select 
+end process 
+
+process peer1_s4 [acceptance_REC:any,askinf_REC:any,paymentprivatefee_EM:any,provinf_EM:any,provm_REC:any,provt_REC:any,refusal_REC:any,request_EM:any]  is 
+ select 
+  provm_REC; peer1_s5 [acceptance_REC,askinf_REC,paymentprivatefee_EM,provinf_EM,provm_REC,provt_REC,refusal_REC,request_EM] 
+
+[]
+  provt_REC; peer1_s6 [acceptance_REC,askinf_REC,paymentprivatefee_EM,provinf_EM,provm_REC,provt_REC,refusal_REC,request_EM] 
+ end select 
+end process 
+
+process peer1_s5 [acceptance_REC:any,askinf_REC:any,paymentprivatefee_EM:any,provinf_EM:any,provm_REC:any,provt_REC:any,refusal_REC:any,request_EM:any]  is 
+ select 
+  paymentprivatefee_EM
+ end select 
+end process 
+
+process peer1_s6 [acceptance_REC:any,askinf_REC:any,paymentprivatefee_EM:any,provinf_EM:any,provm_REC:any,provt_REC:any,refusal_REC:any,request_EM:any]  is 
+ select 
+  paymentprivatefee_EM 
+ end select 
+end process 
+
+process peer2 [acceptance_EM:any,askinf_EM:any,done_REC:any,paymentpublicfee_EM:any,provinf_REC:any,refusal_EM:any,req_EM:any,request_REC:any]  is 
+peer2_s0 [acceptance_EM,askinf_EM,done_REC,paymentpublicfee_EM,provinf_REC,refusal_EM,req_EM,request_REC] 
+end process 
+
+process peer2_s0 [acceptance_EM:any,askinf_EM:any,done_REC:any,paymentpublicfee_EM:any,provinf_REC:any,refusal_EM:any,req_EM:any,request_REC:any]  is 
+ select 
+  request_REC; peer2_s1 [acceptance_EM,askinf_EM,done_REC,paymentpublicfee_EM,provinf_REC,refusal_EM,req_EM,request_REC] 
+ end select 
+end process 
+
+process peer2_s1 [acceptance_EM:any,askinf_EM:any,done_REC:any,paymentpublicfee_EM:any,provinf_REC:any,refusal_EM:any,req_EM:any,request_REC:any]  is 
+ select 
+  askinf_EM; peer2_s2 [acceptance_EM,askinf_EM,done_REC,paymentpublicfee_EM,provinf_REC,refusal_EM,req_EM,request_REC] 
+ end select 
+end process 
+
+process peer2_s2 [acceptance_EM:any,askinf_EM:any,done_REC:any,paymentpublicfee_EM:any,provinf_REC:any,refusal_EM:any,req_EM:any,request_REC:any]  is 
+ select 
+  provinf_REC; peer2_s3 [acceptance_EM,askinf_EM,done_REC,paymentpublicfee_EM,provinf_REC,refusal_EM,req_EM,request_REC] 
+ end select 
+end process 
+
+process peer2_s3 [acceptance_EM:any,askinf_EM:any,done_REC:any,paymentpublicfee_EM:any,provinf_REC:any,refusal_EM:any,req_EM:any,request_REC:any]  is 
+ select 
+  i; peer2_s7 [acceptance_EM,askinf_EM,done_REC,paymentpublicfee_EM,provinf_REC,refusal_EM,req_EM,request_REC] 
+
+[]
+  i; peer2_s8 [acceptance_EM,askinf_EM,done_REC,paymentpublicfee_EM,provinf_REC,refusal_EM,req_EM,request_REC] 
+ end select 
+end process 
+
+process peer2_s7 [acceptance_EM:any,askinf_EM:any,done_REC:any,paymentpublicfee_EM:any,provinf_REC:any,refusal_EM:any,req_EM:any,request_REC:any]  is 
+ select 
+  refusal_EM; peer2_s0 [acceptance_EM,askinf_EM,done_REC,paymentpublicfee_EM,provinf_REC,refusal_EM,req_EM,request_REC] 
+ end select 
+end process 
+
+process peer2_s8 [acceptance_EM:any,askinf_EM:any,done_REC:any,paymentpublicfee_EM:any,provinf_REC:any,refusal_EM:any,req_EM:any,request_REC:any]  is 
+ select 
+  acceptance_EM; peer2_s4 [acceptance_EM,askinf_EM,done_REC,paymentpublicfee_EM,provinf_REC,refusal_EM,req_EM,request_REC] 
+ end select 
+end process 
+
+process peer2_s4 [acceptance_EM:any,askinf_EM:any,done_REC:any,paymentpublicfee_EM:any,provinf_REC:any,refusal_EM:any,req_EM:any,request_REC:any]  is 
+ select 
+  req_EM; peer2_s5 [acceptance_EM,askinf_EM,done_REC,paymentpublicfee_EM,provinf_REC,refusal_EM,req_EM,request_REC] 
+ end select 
+end process 
+
+process peer2_s5 [acceptance_EM:any,askinf_EM:any,done_REC:any,paymentpublicfee_EM:any,provinf_REC:any,refusal_EM:any,req_EM:any,request_REC:any]  is 
+ select 
+  paymentpublicfee_EM; peer2_s6 [acceptance_EM,askinf_EM,done_REC,paymentpublicfee_EM,provinf_REC,refusal_EM,req_EM,request_REC] 
+ end select 
+end process 
+
+process peer2_s6 [acceptance_EM:any,askinf_EM:any,done_REC:any,paymentpublicfee_EM:any,provinf_REC:any,refusal_EM:any,req_EM:any,request_REC:any]  is 
+ select 
+  done_REC; peer2_s0 [acceptance_EM,askinf_EM,done_REC,paymentpublicfee_EM,provinf_REC,refusal_EM,req_EM,request_REC] 
+ end select 
+end process 
+
+process peer3 [paymentm_REC:any,paymentt_REC:any,provm_EM:any,provt_EM:any,recmoneypossm_EM:any,recmoneyposst_EM:any,req_REC:any]  is 
+peer3_s0 [paymentm_REC,paymentt_REC,provm_EM,provt_EM,recmoneypossm_EM,recmoneyposst_EM,req_REC] 
+end process 
+
+process peer3_s0 [paymentm_REC:any,paymentt_REC:any,provm_EM:any,provt_EM:any,recmoneypossm_EM:any,recmoneyposst_EM:any,req_REC:any]  is 
+ select 
+  req_REC; peer3_s1 [paymentm_REC,paymentt_REC,provm_EM,provt_EM,recmoneypossm_EM,recmoneyposst_EM,req_REC] 
+ end select 
+end process 
+
+process peer3_s1 [paymentm_REC:any,paymentt_REC:any,provm_EM:any,provt_EM:any,recmoneypossm_EM:any,recmoneyposst_EM:any,req_REC:any]  is 
+ select 
+  i; peer3_s2 [paymentm_REC,paymentt_REC,provm_EM,provt_EM,recmoneypossm_EM,recmoneyposst_EM,req_REC] 
+
+[]
+  i; peer3_s5 [paymentm_REC,paymentt_REC,provm_EM,provt_EM,recmoneypossm_EM,recmoneyposst_EM,req_REC] 
+ end select 
+end process 
+
+process peer3_s2 [paymentm_REC:any,paymentt_REC:any,provm_EM:any,provt_EM:any,recmoneypossm_EM:any,recmoneyposst_EM:any,req_REC:any]  is 
+ select 
+  provt_EM ; peer3_s3 [paymentm_REC,paymentt_REC,provm_EM,provt_EM,recmoneypossm_EM,recmoneyposst_EM,req_REC] 
+ end select 
+end process 
+
+process peer3_s5 [paymentm_REC:any,paymentt_REC:any,provm_EM:any,provt_EM:any,recmoneypossm_EM:any,recmoneyposst_EM:any,req_REC:any]  is 
+ select 
+  provm_EM; peer3_s6 [paymentm_REC,paymentt_REC,provm_EM,provt_EM,recmoneypossm_EM,recmoneyposst_EM,req_REC] 
+ end select 
+end process 
+
+process peer3_s3 [paymentm_REC:any,paymentt_REC:any,provm_EM:any,provt_EM:any,recmoneypossm_EM:any,recmoneyposst_EM:any,req_REC:any]  is 
+ select 
+  recmoneyposst_EM; peer3_s4 [paymentm_REC,paymentt_REC,provm_EM,provt_EM,recmoneypossm_EM,recmoneyposst_EM,req_REC] 
+ end select 
+end process 
+
+process peer3_s4 [paymentm_REC:any,paymentt_REC:any,provm_EM:any,provt_EM:any,recmoneypossm_EM:any,recmoneyposst_EM:any,req_REC:any]  is 
+ select 
+  paymentt_REC; peer3_s0 [paymentm_REC,paymentt_REC,provm_EM,provt_EM,recmoneypossm_EM,recmoneyposst_EM,req_REC] 
+ end select 
+end process 
+
+process peer3_s6 [paymentm_REC:any,paymentt_REC:any,provm_EM:any,provt_EM:any,recmoneypossm_EM:any,recmoneyposst_EM:any,req_REC:any]  is 
+ select 
+  recmoneypossm_EM; peer3_s7 [paymentm_REC,paymentt_REC,provm_EM,provt_EM,recmoneypossm_EM,recmoneyposst_EM,req_REC] 
+ end select 
+end process 
+
+process peer3_s7 [paymentm_REC:any,paymentt_REC:any,provm_EM:any,provt_EM:any,recmoneypossm_EM:any,recmoneyposst_EM:any,req_REC:any]  is 
+ select 
+  paymentm_REC; peer3_s0 [paymentm_REC,paymentt_REC,provm_EM,provt_EM,recmoneypossm_EM,recmoneyposst_EM,req_REC] 
+ end select 
+end process 
+
+process peer4 [done_EM:any,paymentm_EM:any,paymentprivatefee_REC:any,paymentpublicfee_REC:any,paymentt_EM:any,recmoneypossm_REC:any,recmoneyposst_REC:any]  is 
+peer4_s0 [done_EM,paymentm_EM,paymentprivatefee_REC,paymentpublicfee_REC,paymentt_EM,recmoneypossm_REC,recmoneyposst_REC] 
+end process 
+
+process peer4_s0 [done_EM:any,paymentm_EM:any,paymentprivatefee_REC:any,paymentpublicfee_REC:any,paymentt_EM:any,recmoneypossm_REC:any,recmoneyposst_REC:any]  is 
+ select 
+  recmoneyposst_REC; peer4_s1 [done_EM,paymentm_EM,paymentprivatefee_REC,paymentpublicfee_REC,paymentt_EM,recmoneypossm_REC,recmoneyposst_REC]
+[]
+  recmoneypossm_REC; peer4_s6 [done_EM,paymentm_EM,paymentprivatefee_REC,paymentpublicfee_REC,paymentt_EM,recmoneypossm_REC,recmoneyposst_REC] 
+ end select 
+end process 
+
+process peer4_s1 [done_EM:any,paymentm_EM:any,paymentprivatefee_REC:any,paymentpublicfee_REC:any,paymentt_EM:any,recmoneypossm_REC:any,recmoneyposst_REC:any]  is 
+ select 
+  paymentprivatefee_REC; 
+	peer4_s2 [done_EM,paymentm_EM,paymentprivatefee_REC,paymentpublicfee_REC,paymentt_EM,recmoneypossm_REC,recmoneyposst_REC] 
+[]
+  paymentpublicfee_REC; peer4_s3 [done_EM,paymentm_EM,paymentprivatefee_REC,paymentpublicfee_REC,paymentt_EM,recmoneypossm_REC,recmoneyposst_REC] 
+ end select 
+end process 
+
+process peer4_s2 [done_EM:any,paymentm_EM:any,paymentprivatefee_REC:any,paymentpublicfee_REC:any,paymentt_EM:any,recmoneypossm_REC:any,recmoneyposst_REC:any]  is 
+ select 
+  paymentpublicfee_REC;
+	peer4_s4 [done_EM,paymentm_EM,paymentprivatefee_REC,paymentpublicfee_REC,paymentt_EM,recmoneypossm_REC,recmoneyposst_REC] 
+ end select 
+end process 
+
+process peer4_s4 [done_EM:any,paymentm_EM:any,paymentprivatefee_REC:any,paymentpublicfee_REC:any,paymentt_EM:any,recmoneypossm_REC:any,recmoneyposst_REC:any]  is 
+ select 
+  paymentt_EM; peer4_s5 [done_EM,paymentm_EM,paymentprivatefee_REC,paymentpublicfee_REC,paymentt_EM,recmoneypossm_REC,recmoneyposst_REC] 
+ end select 
+end process 
+
+process peer4_s3 [done_EM:any,paymentm_EM:any,paymentprivatefee_REC:any,paymentpublicfee_REC:any,paymentt_EM:any,recmoneypossm_REC:any,recmoneyposst_REC:any]  is 
+ select 
+  paymentprivatefee_REC; peer4_s4 [done_EM,paymentm_EM,paymentprivatefee_REC,paymentpublicfee_REC,paymentt_EM,recmoneypossm_REC,recmoneyposst_REC] 
+ end select 
+end process 
+
+process peer4_s5 [done_EM:any,paymentm_EM:any,paymentprivatefee_REC:any,paymentpublicfee_REC:any,paymentt_EM:any,recmoneypossm_REC:any,recmoneyposst_REC:any]  is 
+ select 
+  done_EM; peer4_s0 [done_EM,paymentm_EM,paymentprivatefee_REC,paymentpublicfee_REC,paymentt_EM,recmoneypossm_REC,recmoneyposst_REC] 
+ end select 
+end process 
+
+process peer4_s6 [done_EM:any,paymentm_EM:any,paymentprivatefee_REC:any,paymentpublicfee_REC:any,paymentt_EM:any,recmoneypossm_REC:any,recmoneyposst_REC:any]  is 
+ select 
+  paymentprivatefee_REC; peer4_s7 [done_EM,paymentm_EM,paymentprivatefee_REC,paymentpublicfee_REC,paymentt_EM,recmoneypossm_REC,recmoneyposst_REC] 
+
+[]
+  paymentpublicfee_REC; peer4_s8 [done_EM,paymentm_EM,paymentprivatefee_REC,paymentpublicfee_REC,paymentt_EM,recmoneypossm_REC,recmoneyposst_REC] 
+ end select 
+end process 
+
+process peer4_s7 [done_EM:any,paymentm_EM:any,paymentprivatefee_REC:any,paymentpublicfee_REC:any,paymentt_EM:any,recmoneypossm_REC:any,recmoneyposst_REC:any]  is 
+ select 
+  paymentpublicfee_REC; peer4_s9 [done_EM,paymentm_EM,paymentprivatefee_REC,paymentpublicfee_REC,paymentt_EM,recmoneypossm_REC,recmoneyposst_REC] 
+ end select 
+end process 
+
+process peer4_s9 [done_EM:any,paymentm_EM:any,paymentprivatefee_REC:any,paymentpublicfee_REC:any,paymentt_EM:any,recmoneypossm_REC:any,recmoneyposst_REC:any]  is 
+ select 
+  paymentm_EM; peer4_s10 [done_EM,paymentm_EM,paymentprivatefee_REC,paymentpublicfee_REC,paymentt_EM,recmoneypossm_REC,recmoneyposst_REC] 
+ end select 
+end process 
+
+process peer4_s8 [done_EM:any,paymentm_EM:any,paymentprivatefee_REC:any,paymentpublicfee_REC:any,paymentt_EM:any,recmoneypossm_REC:any,recmoneyposst_REC:any]  is 
+ select 
+  paymentprivatefee_REC; peer4_s9 [done_EM,paymentm_EM,paymentprivatefee_REC,paymentpublicfee_REC,paymentt_EM,recmoneypossm_REC,recmoneyposst_REC] 
+ end select 
+end process 
+
+process peer4_s10 [done_EM:any,paymentm_EM:any,paymentprivatefee_REC:any,paymentpublicfee_REC:any,paymentt_EM:any,recmoneypossm_REC:any,recmoneyposst_REC:any]  is 
+ select 
+  done_EM; peer4_s0 [done_EM,paymentm_EM,paymentprivatefee_REC,paymentpublicfee_REC,paymentt_EM,recmoneypossm_REC,recmoneyposst_REC] 
+ end select 
+end process 
+
+(* Datatypes for messages and BAG buffers *)
+
+type Message is 
+request_EM,askinf_REC,provinf_EM,refusal_REC,acceptance_REC,provm_REC,provt_REC,paymentprivatefee_EM,request_REC,askinf_EM,provinf_REC,refusal_EM,acceptance_EM,req_EM,paymentpublicfee_EM,done_REC,req_REC,provt_EM,recmoneyposst_EM,paymentt_REC,provm_EM,recmoneypossm_EM,paymentm_REC,recmoneyposst_REC,paymentprivatefee_REC,paymentpublicfee_REC,paymentt_EM,done_EM,recmoneypossm_REC,paymentm_EM
+with "==", "!="
+end type 
+
+type Queue is list of Message 
+with "==", "!="
+end type 
+
+type BoundedQueue is bqueue (queue: Queue, bound: Nat) 
+with "==", "!="
+end type 
+
+function insert (m: Message, q: Queue): Queue is 
+         case q in 
+         var hd: Message, tl: Queue in 
+             nil         -> return cons(m,nil) 
+           | cons(hd,tl) -> return cons(hd,insert(m,tl)) 
+         end case 
+end function 
+
+(* In the case of BAG buffers, this function checks the presence of a msg m *) 
+(* in the queue q, not necessarily at the first place *) 
+function ishead (m: Message, q: Queue): Bool is 
+         case q in 
+         var hd: Message, tl: Queue in 
+             nil         -> return false 
+           | cons(hd,tl) -> return (m==hd) or ishead(m,tl) 
+         end case 
+end function 
+
+(* In the case of BAG buffers, this function removes one instance of the msg m *) 
+(* This instance can be stored anywhere in the queue *) 
+function remove (m: Message, q: Queue): Queue is 
+         case q in 
+         var hd: Message, tl: Queue in 
+             nil         -> return nil 
+           | cons(hd,tl) -> if (hd==m) then return tl else return cons(hd,remove(m,tl)) end if 
+         end case 
+end function 
+
+function count (q: Queue): Nat is 
+         case q in 
+         var hd: Message, tl: Queue in 
+             nil         -> return 0 
+           | cons(hd,tl) -> return (1+count(tl)) 
+         end case 
+end function 
+
+function bisfull (bq: BoundedQueue): Bool is 
+  return ((count(bq.queue))==bq.bound) 
+end function 
+
+function binsert (m: Message, bq: BoundedQueue): BoundedQueue is 
+  if bisfull(bq) then  
+     return bq  
+  else  
+     return bqueue(insert(m,bq.queue),bq.bound)  
+  end if 
+end function 
+
+function bishead (m: Message, bq: BoundedQueue): Bool is 
+  return ishead(m,bq.queue) 
+end function 
+
+function bremove (m: Message, bq: BoundedQueue): BoundedQueue is 
+  return bqueue(remove(m, bq.queue),bq.bound) 
+end function 
+
+function bcount (bq: BoundedQueue): Nat is 
+  return count(bq.queue) 
+end function 
+
+process queue_peer1 [acceptance_EM:any,acceptance_REC:any,askinf_EM:any,askinf_REC:any,provm_EM:any,provm_REC:any,provt_EM:any,provt_REC:any,refusal_EM:any,refusal_REC:any]  (bq: BoundedQueue) is 
+  select 
+    if not(bisfull(bq)) then askinf_EM ; queue_peer1 [acceptance_EM,acceptance_REC,askinf_EM,askinf_REC,provm_EM,provm_REC,provt_EM,provt_REC,refusal_EM,refusal_REC]  (binsert(askinf_REC,bq)) else stop end if
+    [] 
+    if bishead(askinf_REC,bq) then askinf_REC ; queue_peer1 [acceptance_EM,acceptance_REC,askinf_EM,askinf_REC,provm_EM,provm_REC,provt_EM,provt_REC,refusal_EM,refusal_REC]  (bremove(askinf_REC,bq)) else stop end if
+    [] 
+    if not(bisfull(bq)) then refusal_EM ; queue_peer1 [acceptance_EM,acceptance_REC,askinf_EM,askinf_REC,provm_EM,provm_REC,provt_EM,provt_REC,refusal_EM,refusal_REC]  (binsert(refusal_REC,bq)) else stop end if
+    [] 
+    if bishead(refusal_REC,bq) then refusal_REC ; queue_peer1 [acceptance_EM,acceptance_REC,askinf_EM,askinf_REC,provm_EM,provm_REC,provt_EM,provt_REC,refusal_EM,refusal_REC]  (bremove(refusal_REC,bq)) else stop end if
+    [] 
+    if not(bisfull(bq)) then acceptance_EM ; queue_peer1 [acceptance_EM,acceptance_REC,askinf_EM,askinf_REC,provm_EM,provm_REC,provt_EM,provt_REC,refusal_EM,refusal_REC]  (binsert(acceptance_REC,bq)) else stop end if
+    [] 
+    if bishead(acceptance_REC,bq) then acceptance_REC ; queue_peer1 [acceptance_EM,acceptance_REC,askinf_EM,askinf_REC,provm_EM,provm_REC,provt_EM,provt_REC,refusal_EM,refusal_REC]  (bremove(acceptance_REC,bq)) else stop end if
+    [] 
+    if not(bisfull(bq)) then provm_EM ; queue_peer1 [acceptance_EM,acceptance_REC,askinf_EM,askinf_REC,provm_EM,provm_REC,provt_EM,provt_REC,refusal_EM,refusal_REC]  (binsert(provm_REC,bq)) else stop end if
+    [] 
+    if bishead(provm_REC,bq) then provm_REC ; queue_peer1 [acceptance_EM,acceptance_REC,askinf_EM,askinf_REC,provm_EM,provm_REC,provt_EM,provt_REC,refusal_EM,refusal_REC]  (bremove(provm_REC,bq)) else stop end if
+    [] 
+    if not(bisfull(bq)) then provt_EM ; queue_peer1 [acceptance_EM,acceptance_REC,askinf_EM,askinf_REC,provm_EM,provm_REC,provt_EM,provt_REC,refusal_EM,refusal_REC]  (binsert(provt_REC,bq)) else stop end if
+    [] 
+    if bishead(provt_REC,bq) then provt_REC ; queue_peer1 [acceptance_EM,acceptance_REC,askinf_EM,askinf_REC,provm_EM,provm_REC,provt_EM,provt_REC,refusal_EM,refusal_REC]  (bremove(provt_REC,bq)) else stop end if
+    [] 
+    null 
+  end select 
+ end process 
+
+process queue_peer2 [done_EM:any,done_REC:any,provinf_EM:any,provinf_REC:any,request_EM:any,request_REC:any]  (bq: BoundedQueue) is 
+  select 
+    if not(bisfull(bq)) then request_EM ; queue_peer2 [done_EM,done_REC,provinf_EM,provinf_REC,request_EM,request_REC]  (binsert(request_REC,bq)) else stop end if
+    [] 
+    if bishead(request_REC,bq) then request_REC ; queue_peer2 [done_EM,done_REC,provinf_EM,provinf_REC,request_EM,request_REC]  (bremove(request_REC,bq)) else stop end if
+    [] 
+    if not(bisfull(bq)) then provinf_EM ; queue_peer2 [done_EM,done_REC,provinf_EM,provinf_REC,request_EM,request_REC]  (binsert(provinf_REC,bq)) else stop end if
+    [] 
+    if bishead(provinf_REC,bq) then provinf_REC ; queue_peer2 [done_EM,done_REC,provinf_EM,provinf_REC,request_EM,request_REC]  (bremove(provinf_REC,bq)) else stop end if
+    [] 
+    if not(bisfull(bq)) then done_EM ; queue_peer2 [done_EM,done_REC,provinf_EM,provinf_REC,request_EM,request_REC]  (binsert(done_REC,bq)) else stop end if
+    [] 
+    if bishead(done_REC,bq) then done_REC ; queue_peer2 [done_EM,done_REC,provinf_EM,provinf_REC,request_EM,request_REC]  (bremove(done_REC,bq)) else stop end if
+    [] 
+    null 
+  end select 
+ end process 
+
+process queue_peer3 [paymentm_EM:any,paymentm_REC:any,paymentt_EM:any,paymentt_REC:any,req_EM:any,req_REC:any]  (bq: BoundedQueue) is 
+  select 
+    if not(bisfull(bq)) then req_EM ; queue_peer3 [paymentm_EM,paymentm_REC,paymentt_EM,paymentt_REC,req_EM,req_REC]  (binsert(req_REC,bq)) else stop end if
+    [] 
+    if bishead(req_REC,bq) then req_REC ; queue_peer3 [paymentm_EM,paymentm_REC,paymentt_EM,paymentt_REC,req_EM,req_REC]  (bremove(req_REC,bq)) else stop end if
+    [] 
+    if not(bisfull(bq)) then paymentt_EM ; queue_peer3 [paymentm_EM,paymentm_REC,paymentt_EM,paymentt_REC,req_EM,req_REC]  (binsert(paymentt_REC,bq)) else stop end if
+    [] 
+    if bishead(paymentt_REC,bq) then paymentt_REC ; queue_peer3 [paymentm_EM,paymentm_REC,paymentt_EM,paymentt_REC,req_EM,req_REC]  (bremove(paymentt_REC,bq)) else stop end if
+    [] 
+    if not(bisfull(bq)) then paymentm_EM ; queue_peer3 [paymentm_EM,paymentm_REC,paymentt_EM,paymentt_REC,req_EM,req_REC]  (binsert(paymentm_REC,bq)) else stop end if
+    [] 
+    if bishead(paymentm_REC,bq) then paymentm_REC ; queue_peer3 [paymentm_EM,paymentm_REC,paymentt_EM,paymentt_REC,req_EM,req_REC]  (bremove(paymentm_REC,bq)) else stop end if
+    [] 
+    null 
+  end select 
+ end process 
+
+process queue_peer4 [paymentprivatefee_EM:any,paymentprivatefee_REC:any,paymentpublicfee_EM:any,paymentpublicfee_REC:any,recmoneypossm_EM:any,recmoneypossm_REC:any,recmoneyposst_EM:any,recmoneyposst_REC:any]  (bq: BoundedQueue) is 
+  select 
+    if not(bisfull(bq)) then recmoneyposst_EM ; queue_peer4 [paymentprivatefee_EM,paymentprivatefee_REC,paymentpublicfee_EM,paymentpublicfee_REC,recmoneypossm_EM,recmoneypossm_REC,recmoneyposst_EM,recmoneyposst_REC]  (binsert(recmoneyposst_REC,bq)) else stop end if
+    [] 
+    if bishead(recmoneyposst_REC,bq) then recmoneyposst_REC ; queue_peer4 [paymentprivatefee_EM,paymentprivatefee_REC,paymentpublicfee_EM,paymentpublicfee_REC,recmoneypossm_EM,recmoneypossm_REC,recmoneyposst_EM,recmoneyposst_REC]  (bremove(recmoneyposst_REC,bq)) else stop end if 
+    [] 
+    if not(bisfull(bq)) then paymentprivatefee_EM ; queue_peer4 [paymentprivatefee_EM,paymentprivatefee_REC,paymentpublicfee_EM,paymentpublicfee_REC,recmoneypossm_EM,recmoneypossm_REC,recmoneyposst_EM,recmoneyposst_REC]  (binsert(paymentprivatefee_REC,bq)) else stop end if
+    [] 
+    if bishead(paymentprivatefee_REC,bq) then paymentprivatefee_REC ; queue_peer4 [paymentprivatefee_EM,paymentprivatefee_REC,paymentpublicfee_EM,paymentpublicfee_REC,recmoneypossm_EM,recmoneypossm_REC,recmoneyposst_EM,recmoneyposst_REC]  (bremove(paymentprivatefee_REC,bq)) else stop end if
+    [] 
+    if not(bisfull(bq)) then paymentpublicfee_EM ; queue_peer4 [paymentprivatefee_EM,paymentprivatefee_REC,paymentpublicfee_EM,paymentpublicfee_REC,recmoneypossm_EM,recmoneypossm_REC,recmoneyposst_EM,recmoneyposst_REC]  (binsert(paymentpublicfee_REC,bq)) else stop end if
+    [] 
+    if bishead(paymentpublicfee_REC,bq) then paymentpublicfee_REC ; queue_peer4 [paymentprivatefee_EM,paymentprivatefee_REC,paymentpublicfee_EM,paymentpublicfee_REC,recmoneypossm_EM,recmoneypossm_REC,recmoneyposst_EM,recmoneyposst_REC]  (bremove(paymentpublicfee_REC,bq)) else stop end if
+    [] 
+    if not(bisfull(bq)) then recmoneypossm_EM ; queue_peer4 [paymentprivatefee_EM,paymentprivatefee_REC,paymentpublicfee_EM,paymentpublicfee_REC,recmoneypossm_EM,recmoneypossm_REC,recmoneyposst_EM,recmoneyposst_REC]  (binsert(recmoneypossm_REC,bq)) else stop end if
+    [] 
+    if bishead(recmoneypossm_REC,bq) then recmoneypossm_REC ; queue_peer4 [paymentprivatefee_EM,paymentprivatefee_REC,paymentpublicfee_EM,paymentpublicfee_REC,recmoneypossm_EM,recmoneypossm_REC,recmoneyposst_EM,recmoneyposst_REC]  (bremove(recmoneypossm_REC,bq)) else stop end if
+    [] 
+    null 
+  end select 
+ end process 
+
+process peer_queue_peer1_2 [acceptance_EM:any,acceptance_REC:any,askinf_EM:any,askinf_REC:any,paymentprivatefee_EM:any,provinf_EM:any,provm_EM:any,provm_REC:any,provt_EM:any,provt_REC:any,refusal_EM:any,refusal_REC:any,request_EM:any]  is 
+  par acceptance_REC,askinf_REC,provm_REC,provt_REC,refusal_REC in 
+peer1 [acceptance_REC,askinf_REC,paymentprivatefee_EM,provinf_EM,provm_REC,provt_REC,refusal_REC,request_EM] 
+    || 
+    queue_peer1 [acceptance_EM,acceptance_REC,askinf_EM,askinf_REC,provm_EM,provm_REC,provt_EM,provt_REC,refusal_EM,refusal_REC] (bqueue(nil,2)) 
+  end par 
+end process 
+
+process peer_queue_peer2_2 [acceptance_EM:any,askinf_EM:any,done_EM:any,done_REC:any,paymentpublicfee_EM:any,provinf_EM:any,provinf_REC:any,refusal_EM:any,req_EM:any,request_EM:any,request_REC:any]  is 
+  par done_REC,provinf_REC,request_REC in 
+peer2 [acceptance_EM,askinf_EM,done_REC,paymentpublicfee_EM,provinf_REC,refusal_EM,req_EM,request_REC] 
+    || 
+    queue_peer2 [done_EM,done_REC,provinf_EM,provinf_REC,request_EM,request_REC] (bqueue(nil,2)) 
+  end par 
+end process 
+
+process peer_queue_peer3_2 [paymentm_EM:any,paymentm_REC:any,paymentt_EM:any,paymentt_REC:any,provm_EM:any,provt_EM:any,recmoneypossm_EM:any,recmoneyposst_EM:any,req_EM:any,req_REC:any]  is 
+  par paymentm_REC,paymentt_REC,req_REC in 
+peer3 [paymentm_REC,paymentt_REC,provm_EM,provt_EM,recmoneypossm_EM,recmoneyposst_EM,req_REC] 
+    || 
+    queue_peer3 [paymentm_EM,paymentm_REC,paymentt_EM,paymentt_REC,req_EM,req_REC] (bqueue(nil,2)) 
+  end par 
+end process 
+
+process peer_queue_peer4_2 [done_EM:any,paymentm_EM:any,paymentprivatefee_EM:any,paymentprivatefee_REC:any,paymentpublicfee_EM:any,paymentpublicfee_REC:any,paymentt_EM:any,recmoneypossm_EM:any,recmoneypossm_REC:any,recmoneyposst_EM:any,recmoneyposst_REC:any]  is 
+  par paymentprivatefee_REC,paymentpublicfee_REC,recmoneypossm_REC,recmoneyposst_REC in 
+peer4 [done_EM,paymentm_EM,paymentprivatefee_REC,paymentpublicfee_REC,paymentt_EM,recmoneypossm_REC,recmoneyposst_REC] 
+    || 
+    queue_peer4 [paymentprivatefee_EM,paymentprivatefee_REC,paymentpublicfee_EM,paymentpublicfee_REC,recmoneypossm_EM,recmoneypossm_REC,recmoneyposst_EM,recmoneyposst_REC] (bqueue(nil,2)) 
+  end par 
+end process 
+
+process peer_queue_peer1_3 [acceptance_EM:any,acceptance_REC:any,askinf_EM:any,askinf_REC:any,paymentprivatefee_EM:any,provinf_EM:any,provm_EM:any,provm_REC:any,provt_EM:any,provt_REC:any,refusal_EM:any,refusal_REC:any,request_EM:any]  is 
+  par acceptance_REC,askinf_REC,provm_REC,provt_REC,refusal_REC in 
+peer1 [acceptance_REC,askinf_REC,paymentprivatefee_EM,provinf_EM,provm_REC,provt_REC,refusal_REC,request_EM] 
+    || 
+    queue_peer1 [acceptance_EM,acceptance_REC,askinf_EM,askinf_REC,provm_EM,provm_REC,provt_EM,provt_REC,refusal_EM,refusal_REC] (bqueue(nil,3)) 
+  end par 
+end process 
+
+process peer_queue_peer2_3 [acceptance_EM:any,askinf_EM:any,done_EM:any,done_REC:any,paymentpublicfee_EM:any,provinf_EM:any,provinf_REC:any,refusal_EM:any,req_EM:any,request_EM:any,request_REC:any]  is 
+  par done_REC,provinf_REC,request_REC in 
+peer2 [acceptance_EM,askinf_EM,done_REC,paymentpublicfee_EM,provinf_REC,refusal_EM,req_EM,request_REC] 
+    || 
+    queue_peer2 [done_EM,done_REC,provinf_EM,provinf_REC,request_EM,request_REC] (bqueue(nil,3)) 
+  end par 
+end process 
+
+process peer_queue_peer3_3 [paymentm_EM:any,paymentm_REC:any,paymentt_EM:any,paymentt_REC:any,provm_EM:any,provt_EM:any,recmoneypossm_EM:any,recmoneyposst_EM:any,req_EM:any,req_REC:any]  is 
+  par paymentm_REC,paymentt_REC,req_REC in 
+peer3 [paymentm_REC,paymentt_REC,provm_EM,provt_EM,recmoneypossm_EM,recmoneyposst_EM,req_REC] 
+    || 
+    queue_peer3 [paymentm_EM,paymentm_REC,paymentt_EM,paymentt_REC,req_EM,req_REC] (bqueue(nil,3)) 
+  end par 
+end process 
+
+process peer_queue_peer4_3 [done_EM:any,paymentm_EM:any,paymentprivatefee_EM:any,paymentprivatefee_REC:any,paymentpublicfee_EM:any,paymentpublicfee_REC:any,paymentt_EM:any,recmoneypossm_EM:any,recmoneypossm_REC:any,recmoneyposst_EM:any,recmoneyposst_REC:any]  is 
+  par paymentprivatefee_REC,paymentpublicfee_REC,recmoneypossm_REC,recmoneyposst_REC in 
+peer4 [done_EM,paymentm_EM,paymentprivatefee_REC,paymentpublicfee_REC,paymentt_EM,recmoneypossm_REC,recmoneyposst_REC] 
+    || 
+    queue_peer4 [paymentprivatefee_EM,paymentprivatefee_REC,paymentpublicfee_EM,paymentpublicfee_REC,recmoneypossm_EM,recmoneypossm_REC,recmoneyposst_EM,recmoneyposst_REC] (bqueue(nil,3)) 
+  end par 
+end process 
+
+end module 

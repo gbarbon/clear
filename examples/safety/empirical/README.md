@@ -1,9 +1,9 @@
 ## CLEAR framework
 
-The directory `visualization` contains some examples to evaluate the 
-CLEAR Visualizer. 
+Test cases used for the empirical study:
 
-The directory `safety` contains some case studies with safety properties.
+- test1: Vending Machine case study
+- test2: Communicating Processes case study
 
 License
 =======

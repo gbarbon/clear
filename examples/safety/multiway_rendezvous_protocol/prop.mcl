@@ -1,0 +1,9 @@
+(* Le systeme ne doit pas pouvoir realiser trois ACTION !DLC_GATE_A *)
+[ true* .
+        'ACTION !DLC_GATE_A .*' .
+        true* .
+        'ACTION !DLC_GATE_A .*' .
+        true* .
+        'ACTION !DLC_GATE_A .*'.
+        true*
+      ] false 

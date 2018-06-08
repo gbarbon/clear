@@ -1,0 +1,20 @@
+(* prop in mcl v3 *)
+     [
+        (true* .
+        'LOOSER !1'.
+        true* .
+        'GAME .*. !1 .*'.
+        true*)
+        |
+        (true* .
+        'LOOSER !2'.
+        true* .
+        'GAME .*. !2 .*'.
+        true*)
+        |
+        (true* .
+        'LOOSER !3'.
+        true* .
+        'GAME .*. !3 .*'.
+        true*)
+     ] false 
