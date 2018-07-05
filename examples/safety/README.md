@@ -4,8 +4,8 @@ Case studies with safety properties:
 
 - empirical: case studies for the empirical study
 - sanitary_agency
-- multiway_rendezvous_protocol: (`.aut` model only)
-- shifumi_3: shifumi three players (`.aut` model only)
+- multiway_rendezvous_protocol
+- shifumi_3: rock-paper-scissors three players tournament
 
 License
 =======
