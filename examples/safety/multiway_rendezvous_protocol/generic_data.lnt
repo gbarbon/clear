@@ -1,0 +1,266 @@
+module generic_data (data) is
+
+type nat_set is
+    set of nat
+    with "length", "access", "member"
+end type
+
+type id_set is
+    sorted set of DLC_ID
+    with "head", "length", "access", "member", "diff", "union", "remove", "empty", "inter"
+end type
+
+-------------------------------------------------------------------------------
+
+-- type sync_vect is just an id_set
+
+type sync_vect_list is
+    list of id_set
+    with "head", "access", "length"
+end type
+
+type sync_map_entry is
+    sync_map_entry (gate : DLC_ID, vect_list : sync_vect_list)
+    with "get"
+end type
+
+type sync_map is
+    list of sync_map_entry
+    with "access", "length"
+end type
+
+-------------------------------------------------------------------------------
+
+(* type id_list is *)
+(*     list of DLC_ID *)
+(*     with "member", "remove", "!=" *)
+(* end type *)
+
+type dlc_action is
+    action (gate : DLC_ID)
+    with "get", "=="
+end type
+
+type action_set is
+    set of dlc_action
+    with "length", "access", "member"
+end type
+
+type transition is
+    nil_transition,
+    transition (action : dlc_action, next_states : nat_set)
+    with "get", "=="
+end type
+
+type transition_list is
+    list of transition
+end type
+
+type state is
+    nil_state,
+    state ( id : nat, transitions : transition_list)
+    with "get"
+end type
+
+type state_list is
+    list of state
+end type
+
+type lock is
+    lock (action : dlc_action, index : nat, path : id_set, confirm : bool, purge : id_set)
+    with "get", "set"
+end type
+
+type lock_list is
+   list of lock
+   with "empty", "append", "head", "length", "access", "tail"
+end type
+
+-------------------------------------------------------------------------------
+
+function find_state (space : state_list, id : nat) : state is
+    case space in
+    var i : nat, tra : transition_list, tail : state_list in
+        {} -> return nil_state
+    |   cons(state (i, tra), any state_list) where i == id ->
+            return state (i, tra)
+    |   cons (any state, tail) ->
+            return find_state (tail, id)
+    end case
+end function
+
+function find_transition (tl : transition_list, act : dlc_action) : transition is
+    case tl in
+    var a : dlc_action, nl : nat_set, tail : transition_list in
+        {} -> return nil_transition
+    | cons (transition( a, nl), any transition_list) where a == act ->
+            return transition (a, nl)
+    | cons (any transition, tail) ->
+            return find_transition (tail, act)
+    end case
+end function
+
+function get_next(space : state_list, id : nat, action : dlc_action) : nat_set is
+    var t : transition in
+        t := find_transition (get_transitions (find_state (space, id)), action) ;
+        if t == nil_transition then
+            return {}
+        else
+            return get_next_states (t)
+        end if
+    end var
+end function
+
+function collect_action ( tl : transition_list, al : action_set ) : action_set is
+    case tl in
+    var act : dlc_action, tail : transition_list in
+        {} -> return al
+    | cons (transition (act , any nat_set) , tail) ->
+            return collect_action (tail, insert (act, al))
+    | cons (nil_transition, tail) ->
+            -- should never happen, remove compiler warning
+            return collect_action (tail, al)
+    end case
+end function
+
+function possible_actions (space : state_list, id : nat) : action_set is
+    return collect_action (get_transitions (find_state (space, id)), {})
+end function
+
+function extract_gate (al : action_set, gl : id_set) : id_set is
+    case al in
+    var g : DLC_ID, tail : action_set in
+        {} -> return gl
+    | cons (action (g), tail) ->
+            return extract_gate (tail, insert (g, gl))
+    end case
+end function
+
+type message is
+    READY (autolocked : bool),
+    LOCK (lock : lock),
+    COMMIT,
+    COMMIT (purge : id_set),
+    ABORT,
+    ABORT (purge : id_set)
+end type
+
+type message_list is
+   list of message
+   with "append", "head", "tail", "length", "empty"
+end type
+
+type arrival is
+   arrival (action : dlc_action, arrival : nat)
+   with "get"
+end type
+
+type arrival_list is
+   list of arrival
+   with "access", "length"
+end type
+
+function arrival_state [action_not_found : none](dl : arrival_list, act : dlc_action) : nat
+   (* raises action_not_found : none *)
+is
+   var n : nat in
+      for n := 1 while n <= length (dl) by n := n+1 loop
+         if get_action (access (dl, n)) == act then
+            return get_arrival (access (dl, n))
+         end if
+      end loop;
+      raise action_not_found
+   end var
+end function
+
+-------------------------------------------------------------------------------
+
+type gate_state is
+    idle,
+    dealing
+    with "=="
+end type
+
+function isin (vect, rdytask : id_set) : bool is
+   var n : nat in
+      for n := 1 while n <= length (vect) by n := n+1 loop
+         if not (member (access (vect, n), rdytask)) then
+            return false
+         end if
+      end loop ;
+      return true
+   end var
+end function
+
+function possible_rdv (rdytask : id_set, vectors : sync_vect_list) : bool is
+   var vect : id_set, n : nat in
+      for n := 1 while n <= length (vectors) by n := n+1 loop
+         vect := (access (vectors, n));
+         if isin (vect, rdytask) then
+            return true
+         end if
+      end loop ;
+      return false
+   end var
+end function
+
+function list_rdv_index (rdytask : id_set, vectors : sync_vect_list) : nat_set is
+   var vect : id_set, n : nat, result : nat_set in
+      result := {};
+      for n := 1 while n <= length (vectors) by n := n+1 loop
+         vect := (access (vectors, n));
+         if isin (vect, rdytask) then
+            result := insert (n, result)
+         end if
+      end loop ;
+      return result
+   end var   
+end function
+
+-------------------------------------------------------------------------------
+
+type manager_state is
+    free,
+    locked,
+    autolock_free,
+    autolock_locked
+    with "==", "!="
+end type
+
+function get_sync_vect (lock : lock, gsm : sync_map) : id_set is
+    var g : DLC_ID, n, index : nat in
+        g := get_gate (get_action (lock));
+        index := get_index (lock);
+        for n := 1 while n <= length (gsm) by n := n+1 loop
+            if get_gate (access (gsm, n)) == g then
+                return access (get_vect_list ( access (gsm, n)), index)
+            end if
+        end loop ;
+        return {} of id_set
+    end var
+end function
+
+function next_task ( task : DLC_ID, vect : id_set) : DLC_ID is
+    var n : nat in
+        for n := 1 while n < length (vect) by n := n+1 loop
+            if task == access (vect, n) then
+                return access (vect, n+1)
+            end if
+        end loop ;
+        return DLC_NULL_ID
+    end var
+end function
+
+-------------------------------------------------------------------------------
+
+channel com is
+   (DLC_ID, message)
+end channel
+
+channel annonce is
+   (DLC_ID, id_set)
+end channel
+
+-------------------------------------------------------------------------------
+
+end module

@@ -1,0 +1,107 @@
+-------------------------------------------------------------------------------
+-- Shifumi game, Hugues Evrard
+-------------------------------------------------------------------------------
+
+% NB_PLAYER=$1
+
+% usage() {
+%   echo "USAGE: svl shifumi.svl <nb_player>"
+%   echo "  number of player should be positive"
+%   echo "  max number of players is 250"
+% }
+
+% if test -z "${NB_PLAYER}"
+% then
+%   usage
+%   exit 1
+% fi
+
+% if test ${NB_PLAYER} -lt 1
+% then
+%   usage
+%   exit 1
+% fi
+
+% if test ${NB_PLAYER} -gt 250
+% then
+%   usage
+%   exit 1
+% fi
+
+-------------------------------------------------------------------------------
+-- Edit nat_sup
+
+-- The following commented shell script code avoids to regenerate players when
+-- nat_sup remains the same
+
+--% lastval=`awk '/^!nat_sup/ { print $2 }' shifumi.lnt`
+--% if test $lastval -ne ${NB_PLAYER}
+--% then
+%   rm -f player_*.bcg
+%   tmpfile=`mktemp`
+%   cat shifumi.lnt | sed -e 's/^!nat_sup.*$/!nat_sup '"${NB_PLAYER}"'/' > $tmpfile
+%   mv $tmpfile shifumi.lnt
+--% fi
+
+-------------------------------------------------------------------------------
+-- Generate players state space
+
+-- the dishonest player is always player 1
+% if test ! -f player_1.bcg
+% then
+%   echo "==== PLAYER 1 ===="
+%   lnt.open -root 'player (1, false)' shifumi.lnt generator player_1.bcg
+% fi
+
+-- all other players are honest
+% for i in `seq 2 ${NB_PLAYER}`
+% do
+% if test ! -f player_${i}.bcg
+% then
+%   echo "==== PLAYER $i ===="
+%   lnt.open -root 'player ('"${i}"', true)' shifumi.lnt generator player_${i}.bcg
+% fi
+% done
+
+-------------------------------------------------------------------------------
+-- Generate Exp file for game
+
+% ( echo "par GAME #2 in"
+%   echo "   \"player_1.bcg\""
+%   for i in `seq 2 ${NB_PLAYER}`
+%   do
+%     echo "|| \"player_${i}.bcg\""
+%   done
+%   echo "end par"
+% ) > shifumi.exp
+
+-------------------------------------------------------------------------------
+-- Generate game state space
+
+"game_${NB_PLAYER}.bcg" = strong reduction of "shifumi.exp" ;
+
+-------------------------------------------------------------------------------
+-- Check absence of loops
+
+property LoopExistance
+   "Game state space contains a loop"
+is
+   livelock of hide all but in "game_${NB_PLAYER}.bcg" ;
+end property
+
+-------------------------------------------------------------------------------
+-- Check absence of cheater
+
+property NoCheater
+   "A player that looses never plays again"
+is
+   "diagnostic_game_${NB_PLAYER}.bcg" = "game_${NB_PLAYER}.bcg" |=
+   with evaluator4
+     [
+        true* .
+        { LOOSER ?looser:nat } .
+        true* .
+        { GAME ?m:nat ?n:nat ... where (m = looser) or (n = looser) }
+     ] false ;
+   expected TRUE
+end property

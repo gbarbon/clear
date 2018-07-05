@@ -1,0 +1,98 @@
+% CAESAR_OPEN_OPTIONS="-silent -warning"
+% CAESAR_OPTIONS="-more cat"% CADP_TIME="/usr/bin/time"
+% GENERATOR_EXECUTABLE="./generator.c"
+
+-- Adding macro support
+% DEFAULT_MCL_LIBRARIES="standard.mcl"
+% DEFAULT_EVALUATOR3_LIBRARIES="macros_v3.mcl"
+% DEFAULT_EVALUATOR4_LIBRARIES="macros_v4.mcl"
+
+-- ATTENTION : ce script fonctionne uniquement pour des
+-- formules MCL V3 de la forme "[ R ] false", ou`
+-- la formule reguliere R caracterise les sequences mauvaises 
+
+% LTS=`basename "$1" ".bcg"`
+% FORMULA=`basename "$2" ".mcl"`
+% DEFAULT_PROCESS_FILE="${LTS}.lnt"
+
+"${LTS}_notreduced.bcg" = "${LTS}.bcg";
+
+-- generation of the bcg file from the lnt spec
+"${LTS}.bcg" = generation of tau*.a reduction of "${LTS}_notreduced.bcg";
+
+% start=`date +%s%N`
+
+-- generation of the i.hide file
+% echo 'match\n"i"' > "i.hide"
+
+-- rajout d'un "not" devant la formule
+% echo "not" > "${FORMULA}_not.mcl"
+% cat "${FORMULA}.mcl" >> "${FORMULA}_not.mcl"
+
+-- extraction de la liste des labels du LTS
+% bcg_info -labels ${LTS}.bcg > ${FORMULA}_not_labels
+
+-- conversion de la formule d'entree en graphe
+% bcg_open "${LTS}.bcg" evaluator4 -graph "${FORMULA}_not_labels" "${FORMULA}_not_raw.bcg" "${FORMULA}_not.mcl"
+
+-- suppression des transitions speciales et determinisation
+-- les etats finaux ont une transition sortante "i" (invisible)
+"${FORMULA}_not.bcg" =
+	hide "FINAL" in
+	strong reduction of
+	weak trace reduction of
+	hide ":.*:" in
+	rename ":NOT:" -> "FINAL" in
+	"${FORMULA}_not_raw.bcg" ;
+
+-- generation du sous-LTS contenant les sequences mauvaises,
+-- qui se terminent par des etats finaux, ainsi que leurs
+-- prefixes (qui ne se terminent pas par des etats finaux)
+"${LTS}_bad_unclean.bcg" = generation of
+    (
+	"${LTS}.bcg"
+	||
+	"${FORMULA}_not.bcg"
+    ) ;
+
+-- non-pruned version for java tool with -f option and conversion to aut
+"bad_${FORMULA}_${LTS}_unclean.bcg" = "${LTS}_bad_unclean.bcg";
+% bcg_io "bad_${FORMULA}_${LTS}_unclean.bcg" "bad_${FORMULA}_${LTS}_unclean.aut"
+
+-- renaming the labels file produced by generator:
+% mv "prodcpl.prd" "bad_${FORMULA}_${LTS}_unclean.prd"
+
+% intermediate=`date +%s%N`
+% runtime=$(((intermediate-start)/1000000))
+% echo "Exec time (without pruning) in ms: "${runtime}"\n"
+
+-- suppression des prefixes des sequences qui ne menent pas
+-- a des etats finaux
+% bcg_open "${LTS}_bad_unclean.bcg" ./scrutator -potential ./i.hide "${LTS}_bad_clean.bcg"
+
+-- generation of the visible file
+% echo 'match all but\n"i"' > "vis.hide"
+
+-- suppression des transitions "i" denotant les etats finaux
+-- "bad_${FORMULA}_${LTS}.bcg" = generation of tau*.a reduction of "${LTS}_bad_clean.bcg" ;
+-- "bad_${FORMULA}_${LTS}.bcg" = 
+--    total cut "FINAL" in 
+--    rename "i" ->  "FINAL" in
+--    "${LTS}_bad_clean.bcg" 
+--    end cut;
+% bcg_open "${LTS}_bad_clean.bcg" ./scrutator -potential ./vis.hide "bad_${FORMULA}_${LTS}.bcg"
+
+% end=`date +%s%N`
+% runtime=$(((end-start)/1000000))
+% echo "Total exec time in ms: "${runtime}
+
+-- conversion to aut file format
+% bcg_io "${LTS}.bcg" "${LTS}.aut"
+% bcg_io "bad_${FORMULA}_${LTS}.bcg" "bad_${FORMULA}_${LTS}.aut"
+
+-- cleaning temporary  bcg and mcl files
+% /bin/rm -f "${FORMULA}_not.mcl"  "${FORMULA}_not.bcg" "${LTS}_bad_unclean.bcg" "${LTS}_bad_clean.bcg" "${LTS}_notreduced.bcg" "${FORMULA}_not_raw.bcg"
+
+-- cleaning other temporary files
+% /bin/rm -f "${FORMULA}_not@1.o" "${FORMULA}@1.o" "${FORMULA}_not_raw@1.o" "${LTS}_bad_unclean@1.o" "${LTS}_bad_clean@1.o" "bad_${FORMULA}_${LTS}@1.o" "${LTS}@1.o" "${LTS}_notreduced@1.o"
+% /bin/rm -f "evaluator4" "scrutator" "${FORMULA}_not_labels" "i.hide" "vis.hide"

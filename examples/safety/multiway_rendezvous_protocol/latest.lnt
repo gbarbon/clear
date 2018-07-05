@@ -1,0 +1,471 @@
+module latest (data, generic_data) is
+
+-------------------------------------------------------------------------------
+-- Parameters
+
+-- complexifie la spec pour pas grand chose, on ne l'utilise pas
+
+(* function maximal_progress : bool is *)
+(*     return false *)
+(* end function *)
+
+-------------------------------------------------------------------------------
+
+function BUFSIZE : nat is
+   return 1
+end function
+
+process BUFFER [GETFROM, SENDTO : com] (from, to : DLC_ID) is
+   var
+      msg : message,
+      mq  : message_list
+   in
+      mq := {};
+      loop
+         select
+            only if length (mq) < BUFSIZE then
+               GETFROM (to, ?msg);
+               mq := append (msg, mq)
+            end if
+         []
+            only if not (empty (mq)) then
+               SENDTO (from, head (mq));
+               mq := tail (mq)
+            end if
+         end select
+      end loop
+   end var
+end process
+
+-------------------------------------------------------------------------------
+
+process GATE [SEND, RECV : com, ACTION, HOOK_REFUSE : annonce]
+             (gate : DLC_ID, vectors : sync_vect_list)
+is
+   var
+      state        : gate_state, -- etat de la porte
+      readyset     : id_set,     -- taches pretes
+      autolock     : id_set,     -- taches autoverrouillees
+      dealreadyset : id_set,     -- taches pretes pdt une negociation
+      dealautolock : id_set,     -- taches autoverrouillees pdt une negociation
+      dealvect     : id_set,     -- vecteur de synchro de la negociation
+      dealindex    : nat,        -- index du vecteur de negociation
+      dealpath     : id_set,     -- chemin de verrouillage
+      purge_all    : id_set,     -- ignore rdy jusqu'au prochain rdy(lck)
+      -- purge_keep   : id_set,     -- le prochain rdy(lck) devient rdy
+      -- variables de stockage temporaire
+      n           : nat,
+      task        : DLC_ID,
+      lock        : lock,
+      confirm     : bool,
+      purge       : id_set,
+      autolocked  : bool,
+      vectindexes : nat_set
+   in
+      -- initialisation
+      state        := idle;
+      readyset     := {};
+      autolock     := {};
+      dealreadyset := {};
+      dealautolock := {};
+      dealvect     := {};
+      purge_all    := {};
+      -- purge_keep   := {};
+      dealpath     := {}; -- evite une erreur de compilation 'non init'
+
+      -- boucle principale
+      loop
+         select
+            -- Recoit un message READY
+            RECV (?task, ?READY (autolocked));
+            if member (task, purge_all) then
+               if (autolocked) then
+                  purge_all := remove (task, purge_all)
+                  -- ignore le ready
+               end if
+            (* elsif member (task, purge_keep) and (autolocked) then *)
+            (*    purge_keep := remove (task, purge_keep); *)
+            (*    -- ignore seulement l'auto-verrouillage *)
+            (*    if state == dealing then *)
+            (*       dealreadyset := insert (task, dealreadyset) *)
+            (*    else *)
+            (*       readyset := insert (task, readyset) *)
+            (*    end if *)
+            else
+               if state == dealing then
+                  dealreadyset := insert (task, dealreadyset);
+                  if autolocked then
+                     dealautolock := insert (task, dealautolock)
+                  end if
+               else
+                  readyset := insert (task, readyset);
+                  if autolocked then
+                     autolock := insert (task, autolock)
+                  end if
+               end if
+            end if
+         []
+            -- Commence une negociation
+            only if (state == idle) and (possible_rdv (readyset, vectors)) then
+               vectindexes := list_rdv_index (readyset, vectors);
+               -- Choisi au hasard parmi les synchros possibles
+               dealindex := any nat where member (dealindex, vectindexes);
+               dealvect  := access (vectors, dealindex);
+               dealpath  := diff (dealvect, autolock);
+               if empty (dealpath) then
+                  -- Toutes les taches sont autoverrouillees
+                  select
+                     -- Refuse l'action pour des raisons externes
+                     HOOK_REFUSE (gate, dealvect)
+                  []
+                     -- Accepte l'action et diffuse le resultat
+                     ACTION (gate, dealvect);
+                     for n := 1 while n <= length (dealvect) by n := n+1 loop
+                        SEND (access (dealvect, n), COMMIT)
+                     end loop;
+                     readyset := diff (readyset, dealvect);
+                     autolock := diff (autolock, dealvect)
+                  end select
+               else
+                  task := head (dealpath);
+                  -- La necessite d'une confirmation est choisie au hasard
+                  confirm := any bool;
+                  SEND (task, LOCK (lock (action(gate), dealindex, dealpath,
+                                          confirm, {})));
+                  -- Passe dans l'etat negociation
+                  dealreadyset := {};
+                  dealautolock := {};
+                  state := dealing
+               end if
+            end if
+         []
+            -- Recoit un message COMMIT
+            only if state == dealing then
+               RECV (?task, ?COMMIT (purge) of message);
+
+               (* Les taches de la negociation ne sont plus pretes,
+                  sauf celles qui ont ete prete pendant la
+                  negociation. La tache qui a envoye COMMIT n'est plus
+                  prete. *)
+
+               readyset := diff  (readyset, dealvect);
+               readyset := union (readyset, dealreadyset);
+               readyset := remove (task, readyset);
+               -- idem pour autolock
+               autolock := diff  (autolock, dealvect);
+               autolock := union (autolock, dealautolock);
+               autolock := remove (task, autolock);
+
+               -- les taches signalee doivent etre annulee jusqu'a
+               -- leur prochain autolock
+               purge_all := union (purge_all, purge);
+               readyset := diff (readyset, purge_all);
+               -- sauvegarde l'intersection avec autolock
+               var tmp : id_set in
+                  tmp := inter (purge_all, autolock);
+                  autolock := diff (autolock, purge_all);
+                  purge_all := diff (purge_all, tmp)
+               end var;
+
+               state := idle
+            end if
+         []
+            -- Recoit un message ABORT
+            only if state == dealing then
+               RECV (?task, ?ABORT ( any id_set) of message);
+
+               (* Dans le cas general d'actions avec des offres, la tache qui
+                  refuse la negociation peut le faire non pas parce qu'elle
+                  n'est plus prete sur cette porte, mais parce que ses offres
+                  ne sont plus compatibles. Ainsi, on considere la tache qui
+                  envoie ABORT comme non-prete uniquement si elle n'est pas
+                  presente dans dealreadyset. *)
+
+               readyset := remove (task, readyset);                
+               readyset := union (readyset, dealreadyset);
+               -- idem pour autolock
+               autolock := remove (task, autolock);
+               autolock := union (autolock, dealautolock);
+
+               (* -- GESTION purgekeep *)
+
+               (* -- si ready seulement, alors pas ready *)
+
+               (* -- si autolocked, alors ready et retire de purge_keep *)
+
+               (* -- les taches signalees doivent etre annulee jusqu'a leur *)
+               (* -- prochain autolock, *qui devient un rdy regulier* *)
+               (* purge_keep := union (purge_keep, purge); *)
+
+               (* -- Parmi les taches de purge_keep... *)
+               (* var tmp : id_set in *)
+               (*    -- les taches autolock deviennent pretes sans autolock et sont *)
+               (*    -- retiree de purge_keep *)
+               (*    tmp := inter (purge_keep, autolock); *)
+               (*    autolock := diff (autolock, tmp); *)
+               (*    purge_keep := diff (purge_keep, tmp) *)
+               (* end var; *)
+
+               
+               state := idle
+            end if
+         []
+            -- Recoit un message LOCK
+            only if state == dealing then
+               RECV (?task, ? LOCK (lock) of message);
+               select
+                  HOOK_REFUSE (gate, dealvect);
+                  for n := 1 while n <= length (dealpath) by n := n+1 loop
+                     SEND (access (dealpath, n), ABORT)
+                  end loop;
+                  -- update idem qu'a la reception d'un ABORT
+                  readyset := union (readyset, dealreadyset);
+                  autolock := union (autolock, dealautolock)
+
+
+                  (* ; *)
+                  (* purge_keep := union (purge_keep, lock.purge); *)
+
+                  (* -- Parmi les taches de purge_keep... *)
+                  (* var tmp : id_set in *)
+                  (*    -- les taches autolock deviennent pretes sans autolock et sont *)
+                  (*    -- retiree de purge_keep *)
+                  (*    tmp := inter (purge_keep, autolock); *)
+                  (*    autolock := diff (autolock, tmp); *)
+                  (*    purge_keep := diff (purge_keep, tmp) *)
+                  (* end var *)
+
+               []
+                  ACTION (gate, dealvect);
+                  for n := 1 while n <= length (dealvect) by n := n+1 loop
+                     SEND (access (dealvect, n), COMMIT)
+                  end loop;
+
+                  -- La tache qui a envoye le lock n'est plus prete.
+                  readyset := diff  (readyset, dealvect);
+                  readyset := union (readyset, dealreadyset);
+                  readyset := remove (task, readyset);                  
+                  autolock := diff  (autolock, dealvect);
+                  autolock := union (autolock, dealautolock);
+                  autolock := remove (task, autolock);
+                  
+                  -- purge
+                  purge_all := union (purge_all, lock.purge);
+                  readyset := diff (readyset, purge_all);
+                  var tmp : id_set in
+                     tmp := inter (purge_all, autolock);
+                     autolock := diff (autolock, purge_all);
+                     purge_all := diff (purge_all, tmp)
+                  end var
+
+               end select;
+
+               state := idle
+            end if
+         end select
+      end loop
+   end var
+end process
+
+-------------------------------------------------------------------------------
+
+process MANAGER [SEND, RECV : com, ACTION : annonce]
+                (task : DLC_ID, statespace : state_list, map : sync_map)
+is
+   var
+      manager     : manager_state, -- etat du manager
+      actions     : action_set,    -- actions possibles pour la tache
+      arriv_list  : arrival_list,  -- liste de paires (action, destination)
+      taskstate   : nat,           -- etat courant de la tache
+      waitlock    : lock_list,     -- verrous en attente
+      lock        : lock,          -- verrou actif
+      action      : dlc_action,    -- prochaine action a realiser
+      internal    : bool,          -- une action interne est possible
+      do_internal : bool,          -- une action interne est realisee
+      autolock_gate : DLC_ID,      -- auto-verrouillage sur cette porte
+      -- variables d'iteration, etc
+      to, gate : DLC_ID,
+      n : nat,
+      l : lock,
+      vect : id_set
+   in
+      -- initialisation
+      taskstate := 0;
+      waitlock  := {};
+
+      -- boucle principale
+      loop
+         -- Reinitialisation du manager
+         manager     := free;
+         internal    := false;
+         do_internal := false;
+         -- Evite les warnings du compilateur
+         action        := action (DLC_NULL_ID);
+         autolock_gate := DLC_NULL_ID;
+
+         -- Recupere les actions possibles pour la tache
+         actions := possible_actions (statespace, taskstate);
+
+         -- Choix externe : quand une meme action peut mener a des etats
+         -- differents, il faut choisir *avant* la negociation quel etat
+         -- sera atteint si cette action a lieu.
+         arriv_list   := {};
+         for n := 1 while n <= length(actions) by n := n+1 loop
+            var dest_set : nat_set, dest : nat, act : dlc_action in
+               act := access (actions, n);
+               dest_set := get_next (statespace, taskstate, act);
+               -- on choisi un etat d'arrivee au hasard
+               dest := any nat where member (dest, dest_set);
+               arriv_list := cons (arrival (act, dest), arriv_list)
+            end var
+         end loop;
+
+         if (length (actions) == 1)
+            and ((get_gate (access(actions, 1))) != DLC_GATE_I)
+         then
+            -- Autoverrouillage
+            action := access (actions, 1);
+            autolock_gate := action.gate;
+            SEND (autolock_gate, READY (true));
+            manager := autolock_free
+         else
+            for n := 1 while n <= length(actions) by n := n+1 loop
+               gate := get_gate (access (actions, n));
+               if (gate == DLC_GATE_I) then
+                  internal := true
+               else
+                  SEND (gate, READY (false))
+               end if
+            end loop
+         end if;
+
+         -- Boucle de negociation
+         loop NEGOCIATION in
+            select
+               -- Recoit un message LOCK
+               RECV (? any DLC_ID, ?LOCK (l) of message);
+               waitlock := append (l, waitlock)
+            []
+               -- Traitement du plus vieux verrou en attente
+               only if not (empty (waitlock))
+                  and ((manager == free) or (manager == autolock_free))
+               then
+                  lock       := head (waitlock);
+                  waitlock   := tail (waitlock);
+                  action := lock.action;
+
+                  if manager == autolock_free then
+                     lock := lock.{purge => insert (task, lock.purge)}
+                  end if;
+
+                  if member (action, actions) then
+                     if task == access (lock.path, length (lock.path)) then
+                        -- Fin du chemin de verrouillage
+                        if get_confirm (lock) then
+                           -- Demande confirmation a la porte
+                           SEND (lock.action.gate, LOCK (lock));
+                           if manager == free then
+                              manager := locked
+                           elsif manager == autolock_free then
+                              manager := autolock_locked
+                           end if
+                        else
+                           -- Conclu la negociation
+                           vect := get_sync_vect (lock, map);
+                           ACTION (lock.action.gate, vect);
+                           SEND (lock.action.gate, COMMIT (lock.purge));
+                           for n := 1 while n <= length(vect) by n := n+1 loop
+                              to := access(vect, n);
+                              if to != task then
+                                 SEND (to, COMMIT)
+                              end if
+                           end loop;
+                           break NEGOCIATION
+                        end if
+                     else
+                        -- Transmission du verrou
+                        to := next_task (task, lock.path);
+                        SEND (to, LOCK (lock));
+                        if manager == free then
+                           manager := locked
+                        elsif manager == autolock_free then
+                           manager := autolock_locked
+                        end if
+                     end if
+                  else
+                     -- Refus du verrou
+                     SEND (lock.action.gate, ABORT (lock.purge));
+                     for n := 1 while n <= length (lock.path) by n := n+1 loop
+                        to := access (lock.path, n);
+                        if to < task then
+                           SEND (to, ABORT)
+                        end if
+                     end loop
+                  end if
+               end if
+            []
+               -- Reception d'un message COMMIT
+               only if (manager != free) then
+                  RECV (? any DLC_ID, COMMIT);
+
+                  (* Dans une implementation reelle avec des offres, on peut
+                     s'assurer ici de la compatibilite des offres transmises
+                     par le message COMMIT *)
+                  
+                  break NEGOCIATION
+               end if
+
+            []
+               -- Reception d'un message ABORT
+               only if (manager != free) then
+                  RECV (? any DLC_ID, ABORT);
+                  if manager == locked then
+                     manager := free
+                  elsif manager == autolock_locked then
+                     manager := autolock_free
+                  end if
+               end if
+            []
+               -- Decide d'effectuer une action interne
+               only if (manager == free) and (internal) then
+                  ACTION (DLC_GATE_I, {task});
+                  do_internal := true;
+                  break NEGOCIATION
+               end if
+            end select
+         end loop; -- Fin de boucle NEGOCIATION
+
+         -- Refus des verrous en attente
+         while not (empty (waitlock)) loop
+            l := head (waitlock);
+            -- purge := get_purge (head (waitlock));
+            waitlock := tail (waitlock);
+            -- SEND (get_gate (get_action (l)), ABORT);
+            SEND (l.action.gate, ABORT (l.purge));
+            for n := 1 while n < length (l.path) by n := n+1 loop
+               to := access (l.path, n);
+               if to < task then
+                  SEND (to, ABORT)
+               end if
+            end loop
+         end loop;
+
+         -- Affecte l'action qui a ete choisie
+         if (do_internal) then
+            action := action (DLC_GATE_I)
+         elsif manager == autolock_free then
+            action := action (autolock_gate)
+         end if;
+
+         -- Recupere l'etat d'arrivee choisi pour l'action effectuee
+         taskstate := arrival_state [unexpected] (arriv_list, action)
+         
+         (* nextstates := get_next (statespace, taskstate, action); *)
+         (* n := any nat where (0 < n) and (n <= length (nextstates)); *)
+         (* taskstate := access (nextstates, n) *)
+         
+      end loop -- Fin de boucle principale
+   end var
+end process
+
+end module

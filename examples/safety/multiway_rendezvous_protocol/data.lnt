@@ -1,0 +1,13 @@
+module data is
+
+type DLC_ID is
+DLC_TASK_0_T1,
+DLC_TASK_1_T16,
+DLC_GATE_A,
+DLC_GATE_exit,
+DLC_GATE_i,
+DLC_NULL_ID
+with "==", "!=", "<"
+end type
+
+end module

@@ -1,0 +1,65 @@
+-------------------------------------------------------------------------------
+-- Shifumi game, Hugues Evrard
+-------------------------------------------------------------------------------
+
+module shifumi is
+
+!nat_sup 6
+
+-------------------------------------------------------------------------------
+
+type weapon is
+   rock, paper, scissors
+   with "==", "!="
+end type
+
+-------------------------------------------------------------------------------
+
+function wins_over (w0, w1 : weapon) : bool is
+   case w0 in
+      rock -> return w1 == scissors
+   |  paper -> return w1 == rock
+   |  scissors -> return w1 == paper
+   end case
+end function
+
+-------------------------------------------------------------------------------
+
+channel game is
+   (nat, nat, weapon, weapon)
+end channel
+
+channel nat is (nat) end channel
+channel getweapon is (nat, weapon) end channel
+
+-------------------------------------------------------------------------------
+
+process player [GETWEAPON: getweapon, GAME: game, LOOSER: nat] (self: nat, honest: bool) is
+   var
+      opponent: nat,
+      mine, hers: weapon
+   in
+      loop
+         GETWEAPON (self, ?mine);
+         select
+            GAME (self, ?opponent, mine, ?hers)
+         []
+            GAME (?opponent, self, ?hers, mine)
+         end select;
+         if wins_over (mine, hers) then
+            LOOSER (opponent)
+         elsif wins_over (hers, mine) then
+	    if (not (honest)) and (mine == rock) then
+	       -- dishonest player that looses with rock keeps on playing
+	       null
+	    else
+	       stop
+	    end if
+         end if
+      end loop
+   end var
+end process
+
+-------------------------------------------------------------------------------
+
+end module
