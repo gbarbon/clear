@@ -9,9 +9,8 @@ import clear_analyser.graph.Counterexample;
 import clear_analyser.nbfinder.Neighbourhood;
 import clear_analyser.utils.STDOut;
 
-import java.io.FileNotFoundException;
-import java.util.HashMap;
-import java.util.Map;
+import java.io.*;
+import java.util.*;
 
 
 /**
@@ -67,7 +66,9 @@ public class CexpMatcher {
             endTime = System.currentTimeMillis();
             //if (safety) {
                 outputWriter.printComplete("Shortest Cexp:      " + cexpToString(), true, true);
-                outputWriter.printComplete("Abs. Shortest Cexp: " + absCexpToString(), true, true);
+            outputWriter.printComplete("Dump:               " + cexpDump(), true, true);
+
+            outputWriter.printComplete("Abs. Shortest Cexp: " + absCexpToString(), true, true);
             //} else {
                 //outputWriter.printComplete("Shortest and abstracted shortest counterexample " +
                 //        "cannot be printed\nThey are not in the form of a trace.", true, true);
@@ -119,6 +120,7 @@ public class CexpMatcher {
     private void matchCexp() {
         BFSStackMatcherMinDiff sm = new BFSStackMatcherMinDiff(outputWriter);
         sm.matchNodes(badGraph, badGraph.getInitialNode(), cexp, cexp.getInitialNode());
+        autDump();
     }
 
     /**
@@ -181,6 +183,57 @@ public class CexpMatcher {
             }
         }
         return str;
+    }
+
+    /**
+     * @return the counterexample in the form of a String
+     */
+    private String cexpDump() {
+        GraphNode tmp = this.cexp.getInitialNode();
+        GraphEdge currEdge;
+        String str;
+        str = "("+ tmp.getEquivalentInSpec().getId() +")--";
+        while(!this.cexp.getOutEdges(tmp).isEmpty()) {
+            currEdge = this.cexp.getOutEdges(tmp).iterator().next();
+            str += "[" + currEdge.toString() + "]";
+            tmp = this.cexp.getDest(currEdge);
+            str+="-->("+ tmp.getEquivalentInSpec().getId() +")";
+            if (!this.cexp.getOutEdges(tmp).isEmpty()) {
+                str += "--";
+            }
+        }
+        return str;
+    }
+
+    public boolean autDump() {
+        String resFile = "cexp_dump.aut";
+
+        try (Writer writer = new BufferedWriter(new OutputStreamWriter(
+                new FileOutputStream(baseDir + "/"+resFile, false), "utf-8"))) {
+
+            // writing header
+            writer.write("des ("+ this.cexp.getInitialNode().getId()+", " + this.cexp.getEdges()
+                    .size()+", " + this.cexp.getVertices().size()+")\n");
+
+            List<GraphNode> orderedVertices = new ArrayList<>(cexp.getVertices());
+            Collections.sort(orderedVertices, GraphNode.COMPARE_BY_ID);
+            for (GraphNode node: orderedVertices) {
+                List<GraphNode> orderedSuccessors = new ArrayList<>(this.cexp.getSuccessors(node));
+                Collections.sort(orderedSuccessors, GraphNode.COMPARE_BY_ID);
+                for (GraphNode dest : orderedSuccessors) {
+                    for (GraphEdge edge : this.cexp.findEdgeSet(node, dest))
+                        writer.write("(" + node.getEquivalentInSpec().getId()+ ", \""+ edge
+                                .getAction()+"\"" + ", " +
+                                dest.getEquivalentInSpec().getId() +")\n");
+                }
+            }
+
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
     }
 
     public String cexpToString() {
