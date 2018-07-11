@@ -33,4 +33,6 @@ Files
 - `bad_prop_ISOLATED_unclean.aut` : file required by the *CLEAR analyser*
 - `bad_prop_ISOLATED_unclean.prd` : file required by the *CLEAR analyser*
 - `bad_prop_ISOLATED_res-dump.autx` : counterexample LTS with neighbourhoods, 
-    required by the *CLEAR visualizer* 
+    required by the *CLEAR visualizer*
+- `cexp_dump.aut` : example counterexample trace that can be loaded in the 3D 
+                    LTS representation with the *CLEAR visualizer*  
