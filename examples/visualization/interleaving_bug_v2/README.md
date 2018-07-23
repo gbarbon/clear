@@ -49,4 +49,5 @@ Files
 - `bad_prop_INTERLEAVINGV2_res-dump.autx` : counterexample LTS with neighbourhoods, 
     required by the *CLEAR visualizer*
 - `cexp_dump.aut` : example counterexample trace that can be loaded in the 3D 
-                    LTS representation with the *CLEAR visualizer*  
+                    LTS representation with the *CLEAR visualizer* 
+- `interleavingv2.png` : screenshot example of 3D visualization 

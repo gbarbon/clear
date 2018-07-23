@@ -49,3 +49,4 @@ Files
 - `bad_prop_COMMPROC_unclean.prd` : file required by the *CLEAR analyser*
 - `bad_prop_COMMPROC_res-dump.autx` : counterexample LTS with neighbourhoods, 
     required by the *CLEAR visualizer* 
+- `commproc.png` : screenshot example of 3D visualization 

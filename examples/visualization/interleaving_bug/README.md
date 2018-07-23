@@ -38,3 +38,4 @@ Files
     required by the *CLEAR visualizer*
 - `cexp_dump.aut` : example counterexample trace that can be loaded in the 3D 
                     LTS representation with the *CLEAR visualizer* 
+- `interleaving.png` : screenshot example of 3D visualization 
