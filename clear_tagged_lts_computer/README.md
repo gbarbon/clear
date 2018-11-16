@@ -1,18 +1,18 @@
 ## CLEAR framework
 
-CLEAR analyser
-==============
+CLEAR 'Tagged LTS Computation' Module
+=====================================
 
 
 Installation
 ------------
 
-The CLEAR analyser requires Apache Maven and Java 8.
-To install the CLEAR analyser, download the content of the clear_analyser 
+The CLEAR 'Tagged LTS Computation' module requires Apache Maven and Java 8.
+To install the this module, download the content of the clear_tagged_lts 
 folder and run `mvn install`. 
 Maven will generate two `.jar` file in the `target` directory.
 
-Note that some features of the CLEAR Analyser require the installation of
+Note that some features of the CLEAR 'Tagged LTS Computation' module require the installation of
 the CADP toolbox (http://cadp.inria.fr/registration/).
 
 
@@ -28,11 +28,11 @@ To discover neighbourhoods in the Counterexample LTS:
 - `prop_name` is the filename of the property (without the extension `.mcl`)
 - `-f` is the option to load the `.prd` file containing the states matching
 
-The CLEAR Analyser will display the discovered neighbourhoods and produce an 
+The CLEAR 'Tagged LTS Computation' module will display the discovered neighbourhoods and produce an 
 `.autx` file to be used with the CLEAR visualizer.
 
 
-**NOTE:** *in order to generate the Counterexample LTS the CLEAR analyser 
+**NOTE:** *in order to generate the Counterexample LTS the CLEAR 'Tagged LTS Computation' module 
 exploits some private features of the CADP toolbox, which will be made publicly available in a future CADP release.*
 
 License

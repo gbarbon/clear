@@ -1,0 +1,52 @@
+**** Neo4j queries ****
+
+
+// Shortest path from the initial node to a neighbourhood
+MATCH (init:INITIAL_NODE), (nb:NEIGHBOURHOOD), 
+path = shortestpath((init)-[*]->(nb)) 
+RETURN path ORDER BY length(path) LIMIT 1
+
+// Shortest path from intial node to first neighbourhood, that must pass 
+// through a pattern of two non contiguous actons :
+MATCH (init:INITIAL_NODE), (nb:NEIGHBOURHOOD),
+path = shortestpath((init)-[*]->(nb))
+WITH path, extract(n IN relationships(path) | n.action) AS actions
+WITH path, 
+REDUCE(s = HEAD(actions), n IN TAIL(actions) | s + ', ' + n) AS result
+WHERE  result =~ '.*.ACK_EM.*.DATA_REC.*.'
+RETURN path ORDER BY length(path) LIMIT 1
+
+// Shortest path from intial node to the final node, that must pass through 
+// a pattern of two non contiguous actons :
+MATCH (init:INITIAL_NODE), (final:IS_FINAL), 
+path = shortestpath((init)-[*]->(final))
+WITH path, extract(n IN relationships(path) | n.action) AS actions
+WITH path, 
+REDUCE(s = HEAD(actions), n IN TAIL(actions) | s + ', ' + n) AS result
+WHERE  result =~ '.*.ACK_EM.*.DATA_REC.*.'
+RETURN path ORDER BY length(path) LIMIT 1
+
+// In/Out actions in neighborurhood
+MATCH trans = ()-[]->(nb:NEIGHBOURHOOD)-[]->()
+RETURN trans
+
+// In/Out actions in RED neighborurhood (only red)
+MATCH trans = ()-[]->(nb:NEIGHBOURHOOD)-[]->()
+WHERE nb.nb_type = 'RED'
+RETURN trans
+
+// Shortest path from initial node to a neighbourhood that pass through a given 
+// state (using 'id' property and string pattern matching):
+MATCH (init:INITIAL_NODE), (nb:NEIGHBOURHOOD), 
+path = shortestpath((init)-[*]->(nb))
+WITH path, extract(n IN nodes(path) | n.id) AS states
+WITH path, REDUCE(s = HEAD(states), n IN TAIL(states) | s + ', ' + n) AS result
+WHERE  result =~ '.*. 969.*.'
+RETURN path ORDER BY length(path) LIMIT 1
+
+// Explore a given neighbourhood
+MATCH trans = (s1)-[x1]->(nb:NEIGHBOURHOOD)-[x2]->(s2)
+WITH trans, extract(n IN nodes(trans) | n.id) AS states
+WITH trans, REDUCE(s = HEAD(states), n IN TAIL(states) | s + ', ' + n) AS result
+WHERE  result =~ '.*. 460,.*.'
+RETURN trans
