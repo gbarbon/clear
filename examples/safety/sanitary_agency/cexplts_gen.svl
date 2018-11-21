@@ -1,3 +1,28 @@
+-- copying and patching generator.c
+%cp $CADP/src/open_caesar/generator.c generator.c
+%line58="\     CAESAR_TYPE_FILE caesar_output;"
+%line140='\ '
+%line141='\     caesar_output = fopen ("prodcpl.prd", "w");'
+%line142='\     \     if (caesar_output == NULL) {'
+%line143='\     \     \     CAESAR_ERROR ("file not created");'
+%line144='\     \     exit (1);'
+%line145='\     }'
+%line150='\          fprintf (caesar_output, "%lu = ", caesar_n1);'
+%line151='\          CAESAR_PRINT_STATE (caesar_output, caesar_s1);'
+%line152='\          fprintf (caesar_output, "\\n");'
+%line171='\     fclose (caesar_output);'
+%sed -i "58 a $line58" generator.c
+%sed -i "140 a $line140" generator.c
+%sed -i "141 a $line141" generator.c
+%sed -i "142 a $line142" generator.c
+%sed -i "143 a $line143" generator.c
+%sed -i "144 a $line144" generator.c
+%sed -i "145 a $line145" generator.c
+%sed -i "150 a $line150" generator.c
+%sed -i "151 a $line151" generator.c
+%sed -i "152 a $line152" generator.c
+%sed -i "171 a $line171" generator.c
+
 % CAESAR_OPEN_OPTIONS="-silent -warning"
 % CAESAR_OPTIONS="-more cat"% CADP_TIME="/usr/bin/time"
 % GENERATOR_EXECUTABLE="./generator.c"
